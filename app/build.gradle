@@ -13,7 +13,7 @@ android {
   defaultConfig {
     applicationId "org.appspot.apprtc"
     minSdkVersion 14
-    targetSdkVersion 23
+    targetSdkVersion 19
 
     versionCode 10532
     versionName "r10532"
