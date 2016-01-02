@@ -21,105 +21,112 @@ import java.util.List;
  */
 public interface AppRTCClient {
 
-  /**
-   * Struct holding the connection parameters of an AppRTC room.
-   */
-  public static class RoomConnectionParameters {
-    public final String roomUrl;
-    public final String roomId;
-    public final boolean loopback;
-    public RoomConnectionParameters(
-        String roomUrl, String roomId, boolean loopback) {
-      this.roomUrl = roomUrl;
-      this.roomId = roomId;
-      this.loopback = loopback;
+    /**
+     * Struct holding the connection parameters of an AppRTC room.
+     */
+    public static class RoomConnectionParameters {
+        public final String roomUrl;
+        public final long roomId;
+
+        public RoomConnectionParameters(
+                String roomUrl, long roomId) {
+            this.roomUrl = roomUrl;
+            this.roomId = roomId;
+        }
     }
-  }
 
-  /**
-   * Asynchronously connect to an AppRTC room URL using supplied connection
-   * parameters. Once connection is established onConnectedToRoom()
-   * callback with room parameters is invoked.
-   */
-  public void connectToRoom(RoomConnectionParameters connectionParameters);
+    /**
+     * Asynchronously connect to an AppRTC room URL using supplied connection
+     * parameters. Once connection is established onConnectedToRoom()
+     * callback with room parameters is invoked.
+     */
+    public void connectToRoom(RoomConnectionParameters connectionParameters);
 
-  /**
-   * Send offer SDP to the other participant.
-   */
-  public void sendOfferSdp(final SessionDescription sdp);
+    /**
+     * Send offer SDP to the other participant.
+     */
+    public void sendOfferSdp(final long clientId, final SessionDescription sdp, boolean isHelper);
 
-  /**
-   * Send answer SDP to the other participant.
-   */
-  public void sendAnswerSdp(final SessionDescription sdp);
+    /**
+     * Send answer SDP to the other participant.
+     */
+    public void sendAnswerSdp(final long peerId, final SessionDescription sdp);
 
-  /**
-   * Send Ice candidate to the other participant.
-   */
-  public void sendLocalIceCandidate(final IceCandidate candidate);
+    /**
+     * Send Ice candidate to the other participant.
+     */
+    public void sendLocalIceCandidate(final IceCandidate candidate);
 
-  /**
-   * Disconnect from room.
-   */
-  public void disconnectFromRoom();
+    /**
+     * Disconnect from room.
+     */
+    public void disconnectFromRoom();
 
-  /**
-   * Struct holding the signaling parameters of an AppRTC room.
-   */
-  public static class SignalingParameters {
-    public final List<PeerConnection.IceServer> iceServers;
-    public final boolean initiator;
-    public final String clientId;
-    public final String wssUrl;
-    public final String wssPostUrl;
-    public final SessionDescription offerSdp;
-    public final List<IceCandidate> iceCandidates;
+    /**
+     * Struct holding the signaling parameters of an AppRTC room.
+     */
+    public static class SignalingParameters {
+        public final List<PeerConnection.IceServer> iceServers;
+        public final long clientId;
+        public final String wssUrl;
+        public final String wssPostUrl;
+        public final SessionDescription offerSdp;
+        public final List<IceCandidate> iceCandidates;
 
-    public SignalingParameters(
-        List<PeerConnection.IceServer> iceServers,
-        boolean initiator, String clientId,
-        String wssUrl, String wssPostUrl,
-        SessionDescription offerSdp, List<IceCandidate> iceCandidates) {
-      this.iceServers = iceServers;
-      this.initiator = initiator;
-      this.clientId = clientId;
-      this.wssUrl = wssUrl;
-      this.wssPostUrl = wssPostUrl;
-      this.offerSdp = offerSdp;
-      this.iceCandidates = iceCandidates;
+        public SignalingParameters(
+                List<PeerConnection.IceServer> iceServers,
+                long clientId,
+                String wssUrl, String wssPostUrl,
+                SessionDescription offerSdp, List<IceCandidate> iceCandidates) {
+            this.iceServers = iceServers;
+            this.clientId = clientId;
+            this.wssUrl = wssUrl;
+            this.wssPostUrl = wssPostUrl;
+            this.offerSdp = offerSdp;
+            this.iceCandidates = iceCandidates;
+        }
     }
-  }
-
-  /**
-   * Callback interface for messages delivered on signaling channel.
-   *
-   * <p>Methods are guaranteed to be invoked on the UI thread of |activity|.
-   */
-  public static interface SignalingEvents {
-    /**
-     * Callback fired once the room's signaling parameters
-     * SignalingParameters are extracted.
-     */
-    public void onConnectedToRoom(final SignalingParameters params);
 
     /**
-     * Callback fired once remote SDP is received.
+     * Callback interface for messages delivered on signaling channel.
+     * <p/>
+     * <p>Methods are guaranteed to be invoked on the UI thread of |activity|.
      */
-    public void onRemoteDescription(final SessionDescription sdp);
+    public static interface SignalingEvents {
+        /**
+         * Callback fired once the room's signaling parameters
+         * SignalingParameters are extracted.
+         */
+        public void onConnectedToRoom(final SignalingParameters params);
 
-    /**
-     * Callback fired once remote Ice candidate is received.
-     */
-    public void onRemoteIceCandidate(final IceCandidate candidate);
+        /**
+         * Callback fired once remote SDP is received.
+         */
+        void onRemoteOffer(long peerId, final SessionDescription sdp);
 
-    /**
-     * Callback fired once channel is closed.
-     */
-    public void onChannelClose();
+        /**
+         * 对端应答Offer请求
+         *
+         * @param peerId 对端ID
+         * @param sdp    对端sdp，对端拒绝时sdp为null
+         */
+        void onRemoteAnswer(long peerId, final SessionDescription sdp);
 
-    /**
-     * Callback fired once channel error happened.
-     */
-    public void onChannelError(final String description);
-  }
+        void onClientJoin(long peerId, String deviceType);
+
+        /**
+         * Callback fired once remote Ice candidate is received.
+         */
+        public void onRemoteIceCandidate(long peerId, final IceCandidate candidate);
+
+        /**
+         * Callback fired once channel is closed.
+         */
+        public void onChannelClose();
+
+        /**
+         * Callback fired once channel error happened.
+         */
+        public void onChannelError(final String description);
+    }
 }

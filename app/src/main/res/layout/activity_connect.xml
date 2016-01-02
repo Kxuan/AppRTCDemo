@@ -40,18 +40,23 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"/>
     </LinearLayout>
-    <TextView
-            android:id="@+id/room_edittext_description"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="@string/room_description"/>
+
     <EditText
             android:id="@+id/room_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:imeOptions="actionDone"/>
+            android:imeOptions="actionDone"
+        android:hint="Room ID" />
+
+    <EditText
+        android:id="@+id/client_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
+        android:hint="Master Client ID" />
+
     <TextView
             android:id="@+id/room_listview_description"
             android:layout_width="fill_parent"

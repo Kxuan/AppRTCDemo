@@ -13,8 +13,6 @@ package org.appspot.apprtc;
 import org.appspot.apprtc.RoomParametersFetcher.RoomParametersFetcherEvents;
 import org.appspot.apprtc.WebSocketChannelClient.WebSocketChannelEvents;
 import org.appspot.apprtc.WebSocketChannelClient.WebSocketConnectionState;
-import org.appspot.apprtc.util.AsyncHttpURLConnection;
-import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
 import org.appspot.apprtc.util.LooperExecutor;
 
 import android.util.Log;
@@ -53,13 +51,10 @@ public class WebSocketRTCClient implements AppRTCClient,
 
     ;
     private final LooperExecutor executor;
-    private boolean initiator;
     private SignalingEvents events;
     private WebSocketChannelClient wsClient;
     private ConnectionState roomState;
     private RoomConnectionParameters connectionParameters;
-    private String messageUrl;
-    private String leaveUrl;
 
     public WebSocketRTCClient(SignalingEvents events, LooperExecutor executor) {
         this.events = events;
@@ -127,7 +122,6 @@ public class WebSocketRTCClient implements AppRTCClient,
         Log.d(TAG, "Disconnect. Room state: " + roomState);
         if (roomState == ConnectionState.CONNECTED) {
             Log.d(TAG, "Closing room.");
-            sendPostMessage(MessageType.LEAVE, leaveUrl, null);
         }
         roomState = ConnectionState.CLOSED;
         if (wsClient != null) {
@@ -142,53 +136,29 @@ public class WebSocketRTCClient implements AppRTCClient,
                 + connectionParameters.roomId;
     }
 
-    private String getMessageUrl(RoomConnectionParameters connectionParameters,
-                                 SignalingParameters signalingParameters) {
-        return connectionParameters.roomUrl + "/" + ROOM_MESSAGE + "/"
-                + connectionParameters.roomId + "/" + signalingParameters.clientId;
-    }
-
-    private String getLeaveUrl(RoomConnectionParameters connectionParameters,
-                               SignalingParameters signalingParameters) {
-        return connectionParameters.roomUrl + "/" + ROOM_LEAVE + "/"
-                + connectionParameters.roomId + "/" + signalingParameters.clientId;
-    }
-
     // Callback issued when room parameters are extracted. Runs on local
     // looper thread.
     private void signalingParametersReady(
             final SignalingParameters signalingParameters) {
         Log.d(TAG, "Room connection completed.");
-        if (connectionParameters.loopback
-                && (!signalingParameters.initiator
-                || signalingParameters.offerSdp != null)) {
-            reportError("Loopback room is busy.");
-            return;
-        }
-        if (!connectionParameters.loopback
-                && !signalingParameters.initiator
-                && signalingParameters.offerSdp == null) {
-            Log.w(TAG, "No offer SDP in room response.");
-        }
-        initiator = signalingParameters.initiator;
-        messageUrl = getMessageUrl(connectionParameters, signalingParameters);
-        leaveUrl = getLeaveUrl(connectionParameters, signalingParameters);
-        Log.d(TAG, "Message URL: " + messageUrl);
-        Log.d(TAG, "Leave URL: " + leaveUrl);
         roomState = ConnectionState.CONNECTED;
-
-        // Fire connection and signaling parameters events.
-        events.onConnectedToRoom(signalingParameters);
 
         // Connect and register WebSocket client.
         wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
         wsClient.register(connectionParameters.roomId, signalingParameters.clientId);
+
         Log.d(TAG, "signal connected");
+
+        // Fire connection and signaling parameters events.
+        events.onConnectedToRoom(signalingParameters);
     }
 
     // Send local offer SDP to the other participant.
     @Override
-    public void sendOfferSdp(final SessionDescription sdp) {
+    public void sendOfferSdp(final long peerId, final SessionDescription sdp, final boolean isHelper) {
+
+        Log.w(TAG,"Calling sendOfferSdp",new Exception());
+
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -196,34 +166,47 @@ public class WebSocketRTCClient implements AppRTCClient,
                     reportError("Sending offer SDP in non connected state.");
                     return;
                 }
+
                 JSONObject json = new JSONObject();
-                jsonPut(json, "sdp", sdp.description);
-                jsonPut(json, "type", "offer");
+                jsonPut(json, "cmd", "offer");
+                jsonPut(json, "to", peerId);
+                jsonPut(json, "isHelper", isHelper);
+                JSONObject jsonContent = new JSONObject();
+                jsonPut(jsonContent, "sdp", sdp.description);
+                jsonPut(jsonContent, "type", "offer");
+                jsonPut(json, "content", jsonContent);
                 wsClient.send(json.toString());
-                if (connectionParameters.loopback) {
-                    // In loopback mode rename this offer to answer and route it back.
-                    SessionDescription sdpAnswer = new SessionDescription(
-                            SessionDescription.Type.fromCanonicalForm("answer"),
-                            sdp.description);
-                    events.onRemoteDescription(sdpAnswer);
-                }
             }
         });
     }
 
     // Send local answer SDP to the other participant.
+
+    /**
+     * 发送 answer 消息（应答offer消息）
+     * <p/>
+     * 如果sdp为null则拒绝offer，否则接受offer
+     *
+     * @param peerId 对端Id
+     * @param sdp    本地的sdp。
+     */
     @Override
-    public void sendAnswerSdp(final SessionDescription sdp) {
+    public void sendAnswerSdp(final long peerId, final SessionDescription sdp) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                if (connectionParameters.loopback) {
-                    Log.e(TAG, "Sending answer in loopback mode.");
-                    return;
-                }
                 JSONObject json = new JSONObject();
-                jsonPut(json, "sdp", sdp.description);
-                jsonPut(json, "type", "answer");
+                jsonPut(json, "cmd", "answer");
+                jsonPut(json, "to", peerId);
+                if (sdp != null) {
+                    jsonPut(json, "accept", true);
+                    JSONObject jsonContent = new JSONObject();
+                    jsonPut(jsonContent, "sdp", sdp.description);
+                    jsonPut(jsonContent, "type", "answer");
+                    jsonPut(json, "content", jsonContent);
+                } else {
+                    jsonPut(json, "accept", false);
+                }
                 wsClient.send(json.toString());
             }
         });
@@ -236,15 +219,12 @@ public class WebSocketRTCClient implements AppRTCClient,
             @Override
             public void run() {
                 JSONObject json = new JSONObject();
-                jsonPut(json, "type", "candidate");
+                jsonPut(json, "cmd", "candidate");
                 jsonPut(json, "label", candidate.sdpMLineIndex);
                 jsonPut(json, "id", candidate.sdpMid);
                 jsonPut(json, "candidate", candidate.sdp);
                 // Call receiver sends ice candidates to websocket server.
                 wsClient.send(json.toString());
-                if (connectionParameters.loopback) {
-                    events.onRemoteIceCandidate(candidate);
-                }
             }
         });
     }
@@ -261,50 +241,54 @@ public class WebSocketRTCClient implements AppRTCClient,
         }
         try {
             JSONObject json = new JSONObject(msg);
-            String msgText = json.getString("msg");
-            String errorText = json.optString("error");
-            if (msgText.length() > 0) {
-                json = new JSONObject(msgText);
-                String type = json.optString("type");
-                if (type.equals("candidate")) {
+            JSONObject jsonContent;
+            String type = json.optString("type");
+            switch (type) {
+                case "offer": {
+                    long fromPeerId = json.getLong("from");
+                    jsonContent = json.getJSONObject("content");
+                    //收到offer消息。创建sdp并通知主程序
+                    SessionDescription sdp = new SessionDescription(
+                            SessionDescription.Type.OFFER,
+                            jsonContent.getString("sdp"));
+                    events.onRemoteOffer(fromPeerId, sdp);
+                    break;
+                }
+                case "answer": {
+                    long fromPeerId = json.getLong("from");
+                    jsonContent = json.getJSONObject("content");
+                    //收到answer消息
+                    // 如果对方接受则传递sdp，否则sdp参数传null
+                    if (json.getBoolean("accept")) {
+                        SessionDescription sdp = new SessionDescription(
+                                SessionDescription.Type.ANSWER,
+                                jsonContent.getString("sdp"));
+                        events.onRemoteAnswer(fromPeerId, sdp);
+                    } else {
+                        events.onRemoteAnswer(fromPeerId, null);
+                    }
+                    break;
+                }
+                case "candidate": {
+                    long fromPeerId = json.getLong("from");
+                    jsonContent = json.getJSONObject("content");
                     IceCandidate candidate = new IceCandidate(
-                            json.getString("id"),
-                            json.getInt("label"),
-                            json.getString("candidate"));
-                    events.onRemoteIceCandidate(candidate);
-                } else if (type.equals("answer")) {
-                    if (initiator) {
-                        SessionDescription sdp = new SessionDescription(
-                                SessionDescription.Type.fromCanonicalForm(type),
-                                json.getString("sdp"));
-                        events.onRemoteDescription(sdp);
-                    } else {
-                        reportError("Received answer for call initiator: " + msg);
-                    }
-                } else if (type.equals("offer")) {
-                    if (!initiator) {
-                        SessionDescription sdp = new SessionDescription(
-                                SessionDescription.Type.fromCanonicalForm(type),
-                                json.getString("sdp"));
-                        events.onRemoteDescription(sdp);
-                    } else {
-                        reportError("Received offer for call receiver: " + msg);
-                    }
-                } else if (type.equals("bye")) {
-                    events.onChannelClose();
-                } else if (type.equals("join")) {
-                    //FIXME Add Join action
-                    Log.i(TAG, "join event");
-                } else {
-                    reportError("Unexpected WebSocket message: " + msg);
+                            jsonContent.getString("id"),
+                            jsonContent.getInt("label"),
+                            jsonContent.getString("candidate"));
+                    events.onRemoteIceCandidate(fromPeerId, candidate);
+                    break;
                 }
-            } else {
-                if (errorText != null && errorText.length() > 0) {
-                    reportError("WebSocket error message: " + errorText);
-                } else {
-                    reportError("Unexpected WebSocket message: " + msg);
+                case "join": {
+                    long fromPeerId = json.getLong("id");
+                    events.onClientJoin(fromPeerId, json.getString("device"));
+                    break;
                 }
+                default:
+                    Log.w(TAG, "Unexpected WebSocket message :" + msg);
+                    //reportError("Unexpected WebSocket message: " + msg);
             }
+
         } catch (JSONException e) {
             reportError("WebSocket message JSON parsing error: " + e.toString());
         }
@@ -342,38 +326,5 @@ public class WebSocketRTCClient implements AppRTCClient,
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    // Send SDP or ICE candidate to a room server.
-    private void sendPostMessage(
-            final MessageType messageType, final String url, final String message) {
-        String logInfo = url;
-        if (message != null) {
-            logInfo += ". Message: " + message;
-        }
-        Log.d(TAG, "C->GAE: " + logInfo);
-        AsyncHttpURLConnection httpConnection = new AsyncHttpURLConnection(
-                "POST", url, message, new AsyncHttpEvents() {
-            @Override
-            public void onHttpError(String errorMessage) {
-                reportError("GAE POST error: " + errorMessage);
-            }
-
-            @Override
-            public void onHttpComplete(String response) {
-                if (messageType == MessageType.MESSAGE) {
-                    try {
-                        JSONObject roomJson = new JSONObject(response);
-                        String result = roomJson.getString("result");
-                        if (!result.equals("SUCCESS")) {
-                            reportError("GAE POST error: " + result);
-                        }
-                    } catch (JSONException e) {
-                        reportError("GAE POST JSON error: " + e.toString());
-                    }
-                }
-            }
-        });
-        httpConnection.send();
     }
 }

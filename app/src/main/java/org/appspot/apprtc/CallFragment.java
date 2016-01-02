@@ -109,7 +109,7 @@ public class CallFragment extends Fragment {
     boolean captureSliderEnabled = false;
     Bundle args = getArguments();
     if (args != null) {
-      String contactName = args.getString(CallActivity.EXTRA_ROOMID);
+      String contactName = Long.toString(args.getLong(CallActivity.EXTRA_ROOMID));
       contactView.setText(contactName);
       videoCallEnabled = args.getBoolean(CallActivity.EXTRA_VIDEO_CALL, true);
       captureSliderEnabled = videoCallEnabled
