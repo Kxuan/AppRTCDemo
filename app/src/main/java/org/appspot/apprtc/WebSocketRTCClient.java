@@ -157,7 +157,7 @@ public class WebSocketRTCClient implements AppRTCClient,
     @Override
     public void sendOfferSdp(final long peerId, final SessionDescription sdp, final boolean isHelper) {
 
-        Log.w(TAG,"Calling sendOfferSdp",new Exception());
+        Log.w(TAG, "Calling sendOfferSdp", new Exception());
 
         executor.execute(new Runnable() {
             @Override
@@ -214,15 +214,18 @@ public class WebSocketRTCClient implements AppRTCClient,
 
     // Send Ice candidate to the other participant.
     @Override
-    public void sendLocalIceCandidate(final IceCandidate candidate) {
+    public void sendLocalIceCandidate(final long peerId, final IceCandidate candidate) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 JSONObject json = new JSONObject();
+                JSONObject jsonContent = new JSONObject();
                 jsonPut(json, "cmd", "candidate");
-                jsonPut(json, "label", candidate.sdpMLineIndex);
-                jsonPut(json, "id", candidate.sdpMid);
-                jsonPut(json, "candidate", candidate.sdp);
+                jsonPut(json, "to", peerId);
+                jsonPut(jsonContent, "label", candidate.sdpMLineIndex);
+                jsonPut(jsonContent, "id", candidate.sdpMid);
+                jsonPut(jsonContent, "candidate", candidate.sdp);
+                jsonPut(json, "content", jsonContent);
                 // Call receiver sends ice candidates to websocket server.
                 wsClient.send(json.toString());
             }

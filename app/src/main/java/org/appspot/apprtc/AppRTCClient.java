@@ -55,7 +55,7 @@ public interface AppRTCClient {
     /**
      * Send Ice candidate to the other participant.
      */
-    public void sendLocalIceCandidate(final IceCandidate candidate);
+    public void sendLocalIceCandidate(long peerId, final IceCandidate candidate);
 
     /**
      * Disconnect from room.

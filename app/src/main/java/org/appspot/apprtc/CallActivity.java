@@ -556,7 +556,7 @@ public class CallActivity extends Activity
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
 
         //TODO 针对不同的设备类型做相应处理
-        switch (deviceType){
+        switch (deviceType) {
 
         }
     }
@@ -622,11 +622,14 @@ public class CallActivity extends Activity
 
     @Override
     public void onIceCandidate(final IceCandidate candidate) {
+        if (!this.isHelperMode)
+            throw new RuntimeException("不在助手模式");
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (appRtcClient != null) {
-                    appRtcClient.sendLocalIceCandidate(candidate);
+                    appRtcClient.sendLocalIceCandidate(CallActivity.this.masterId, candidate);
                 }
             }
         });
