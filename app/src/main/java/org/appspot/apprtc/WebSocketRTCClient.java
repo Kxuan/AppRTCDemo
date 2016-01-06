@@ -90,8 +90,9 @@ public class WebSocketRTCClient implements AppRTCClient,
     }
 
     // Connects to room - function runs on a local looper thread.
+    //
     private void connectToRoomInternal() {
-        String connectionUrl = getConnectionUrl(connectionParameters);
+        String connectionUrl = getConnectionUrl(connectionParameters);//构造房间信息,全地址
         Log.d(TAG, "Connect to room: " + connectionUrl);
         roomState = ConnectionState.NEW;
         wsClient = new WebSocketChannelClient(executor, this);
@@ -130,6 +131,7 @@ public class WebSocketRTCClient implements AppRTCClient,
     }
 
     // Helper functions to get connection, post message and leave message URLs
+    //构造消息
     private String getConnectionUrl(
             RoomConnectionParameters connectionParameters) {
         return connectionParameters.roomUrl + "/" + ROOM_JOIN + "/"

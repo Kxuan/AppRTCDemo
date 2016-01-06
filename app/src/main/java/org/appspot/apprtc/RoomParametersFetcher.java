@@ -81,10 +81,11 @@ public class RoomParametersFetcher {
                         roomHttpResponseParse(response);
                     }
                 });
+        //向中心服务器发送连接信息
         httpConnection.send();
     }
 
-    //解析房间服务器应答的房间信息
+    //解析zhongxin服务器应答的
     //POST URL:
     //  https://<room_server_address>/join/<room_id>
     private void roomHttpResponseParse(String response) {

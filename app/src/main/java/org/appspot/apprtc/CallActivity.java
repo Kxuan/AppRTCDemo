@@ -197,7 +197,8 @@ public class CallActivity extends Activity
             }
         }
 
-        // Get Intent parameters.
+            // Get Intent parameters.
+        //得到房间信息的一些参数
         final Intent intent = getIntent();
         Uri roomUri = intent.getData();
         if (roomUri == null) {
@@ -375,6 +376,8 @@ public class CallActivity extends Activity
         // Start room connection.
         logAndToast(getString(R.string.connecting_to,
                 roomConnectionParameters.roomUrl));
+
+        //进入连接中心服务器函数，参数roomConnectionParameters为房间信息
         appRtcClient.connectToRoom(roomConnectionParameters);
 
         // Create and audio manager that will take care of audio routing,
@@ -606,7 +609,7 @@ public class CallActivity extends Activity
                     //本地sdp已就绪
 
                     if (isHelperMode) {
-                        //如果当前是助手模式，则向Master发送rtc邀请
+                        //如果当前是助手模式，则向Master发送rtc邀请,true：助手模式
                         appRtcClient.sendOfferSdp(masterId, sdp, true);
                     } else {
                         //不支持非助手模式

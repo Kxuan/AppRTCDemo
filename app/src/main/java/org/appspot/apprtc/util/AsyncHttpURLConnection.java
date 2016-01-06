@@ -93,8 +93,9 @@ public class AsyncHttpURLConnection {
         outStream.close();
       }
 
-      // Get response.
+      // Get response.//得到应答
       int responseCode = connection.getResponseCode();
+
       if (responseCode != 200) {
         events.onHttpError("Non-200 response to " + method + " to URL: "
             + url + " : " + connection.getHeaderField(null));

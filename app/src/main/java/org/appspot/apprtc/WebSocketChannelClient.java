@@ -118,6 +118,8 @@ public class WebSocketChannelClient {
             return;
         }
         Log.d(TAG, "Registering WebSocket for room " + roomID + ". CLientID: " + clientID);
+
+        //构造消息
         JSONObject json = new JSONObject();
         try {
             json.put("cmd", "register");
@@ -131,6 +133,7 @@ public class WebSocketChannelClient {
             // Send any previously accumulated messages.
             for (String sendMessage : wsSendQueue) {
                 send(sendMessage);
+                //向消息服务器发送消息
             }
             wsSendQueue.clear();
         } catch (JSONException e) {
