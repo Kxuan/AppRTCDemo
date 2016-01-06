@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.view;
+package com.zijunlin.Zxing.view;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,7 +26,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.google.zxing.ResultPoint;
-import com.zijunlin.Zxing.Demo.camera.CameraManager;
+import com.zijunlin.Zxing.camera.CameraManager;
 
 import org.appspot.apprtc.R;
 

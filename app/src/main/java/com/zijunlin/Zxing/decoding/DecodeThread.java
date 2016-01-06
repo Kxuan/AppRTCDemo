@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.decoding;
+package com.zijunlin.Zxing.decoding;
 
 import android.os.Handler;
 import android.os.Looper;

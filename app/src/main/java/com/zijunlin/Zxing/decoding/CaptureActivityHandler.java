@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.decoding;
+package com.zijunlin.Zxing.decoding;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,8 +30,8 @@ import com.google.zxing.Result;
 import org.appspot.apprtc.QrActivity;
 import org.appspot.apprtc.R;
 
-import com.zijunlin.Zxing.Demo.camera.CameraManager;
-import com.zijunlin.Zxing.Demo.view.*;
+import com.zijunlin.Zxing.camera.CameraManager;
+import com.zijunlin.Zxing.view.*;
 
 import java.util.Vector;
 

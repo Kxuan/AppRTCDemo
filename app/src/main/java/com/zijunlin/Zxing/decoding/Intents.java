@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.decoding;
+package com.zijunlin.Zxing.decoding;
 
 /**
  * This class provides the constants to use when sending an Intent to Barcode Scanner.

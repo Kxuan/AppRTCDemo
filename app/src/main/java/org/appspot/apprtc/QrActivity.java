@@ -21,10 +21,10 @@ import android.view.SurfaceView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
-import com.zijunlin.Zxing.Demo.camera.CameraManager;
-import com.zijunlin.Zxing.Demo.decoding.CaptureActivityHandler;
-import com.zijunlin.Zxing.Demo.decoding.InactivityTimer;
-import com.zijunlin.Zxing.Demo.view.ViewfinderView;
+import com.zijunlin.Zxing.camera.CameraManager;
+import com.zijunlin.Zxing.decoding.CaptureActivityHandler;
+import com.zijunlin.Zxing.decoding.InactivityTimer;
+import com.zijunlin.Zxing.view.ViewfinderView;
 
 import java.io.IOException;
 import java.util.Vector;

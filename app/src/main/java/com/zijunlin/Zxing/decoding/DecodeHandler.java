@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.decoding;
+package com.zijunlin.Zxing.decoding;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,8 +31,8 @@ import com.google.zxing.common.HybridBinarizer;
 import org.appspot.apprtc.QrActivity;
 import org.appspot.apprtc.R;
 
-import com.zijunlin.Zxing.Demo.camera.CameraManager;
-import com.zijunlin.Zxing.Demo.camera.PlanarYUVLuminanceSource;
+import com.zijunlin.Zxing.camera.CameraManager;
+import com.zijunlin.Zxing.camera.PlanarYUVLuminanceSource;
 
 import java.util.Hashtable;
 

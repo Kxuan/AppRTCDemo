@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zijunlin.Zxing.Demo.camera;
+package com.zijunlin.Zxing.camera;
 
 import android.graphics.Bitmap;
 
