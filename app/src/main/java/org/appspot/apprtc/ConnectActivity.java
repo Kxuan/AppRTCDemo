@@ -47,6 +47,9 @@ public class ConnectActivity extends Activity {
     private static final int CONNECTION_REQUEST = 1;
     private static boolean commandLineRun = false;
 
+
+    private ImageButton qrButton;//二维码识别按钮
+
     private ImageButton addRoomButton;
     private ImageButton removeRoomButton;
     private ImageButton connectButton;
@@ -120,6 +123,11 @@ public class ConnectActivity extends Activity {
 
         roomListView = (ListView) findViewById(R.id.room_listview);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+        //找到布局中的二维码按钮
+        qrButton = (ImageButton) findViewById(R.id.qr_button);
+        //绑定二维码的点击事件,参数为事件
+        qrButton.setOnClickListener(qrListener);
 
         addRoomButton = (ImageButton) findViewById(R.id.add_room_button);
         addRoomButton.setOnClickListener(addRoomListener);
@@ -204,6 +212,7 @@ public class ConnectActivity extends Activity {
         }
     };
 
+    //包括启动callActivity
     private void connectToRoom(int runTimeMs) {
 
         long masterId = -1, roomId;
@@ -367,6 +376,24 @@ public class ConnectActivity extends Activity {
                 }).create().show();
         return false;
     }
+
+    //二维码的点击事件
+    private final View.OnClickListener qrListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Toast logToast;
+            logToast = Toast.makeText(ConnectActivity.this, "打开扫一扫", Toast.LENGTH_SHORT);
+            logToast.show();
+            qrStart();
+        }
+    };
+
+    //构造intent 启动二维码Activity
+    private void qrStart() {
+        Intent intent = new Intent(this, QrActivity.class);
+        startActivity(intent);
+    }
+
 
     private final OnClickListener addRoomListener = new OnClickListener() {
         @Override

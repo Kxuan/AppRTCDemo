@@ -11,8 +11,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-            <ImageButton
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <ImageButton
                 android:id="@+id/add_room_button"
                 android:background="@android:drawable/ic_menu_add"
                 android:contentDescription="@string/add_room_description"
@@ -39,6 +41,13 @@
                 android:contentDescription="@string/connect_loopback_description"
                 android:layout_width="48dp"
                 android:layout_height="48dp"/>
+
+        <ImageButton
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:id="@+id/qr_button"
+            android:background="@drawable/disconnect"
+            android:layout_weight="0.05" />
     </LinearLayout>
 
     <EditText
