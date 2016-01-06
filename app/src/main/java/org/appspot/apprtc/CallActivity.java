@@ -347,6 +347,40 @@ public class CallActivity extends Activity
     }
 
     private void updateVideoView() {
+logAndToast("是不是助手模式:"+isHelperMode);
+        //如果是助手模式,就把本地视频全屏(不管远程)
+        if(isHelperMode)
+        {
+            logAndToast("助手模式,全屏");
+            localRenderLayout.setPosition(
+                    LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
+            localRender.setScalingType(scalingType);
+
+
+        }
+        else
+        {
+            remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
+            remoteRender.setScalingType(scalingType);
+            remoteRender.setMirror(false);
+
+            if (iceConnected) {
+                localRenderLayout.setPosition(
+                        LOCAL_X_CONNECTED, LOCAL_Y_CONNECTED, LOCAL_WIDTH_CONNECTED, LOCAL_HEIGHT_CONNECTED);
+                localRender.setScalingType(ScalingType.SCALE_ASPECT_FIT);
+            } else {
+                localRenderLayout.setPosition(
+                        LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
+                localRender.setScalingType(scalingType);
+            }
+        }
+
+        localRender.setMirror(true);
+
+        localRender.requestLayout();
+        remoteRender.requestLayout();
+
+        /*/原来的代码,备用
         remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
         remoteRender.setScalingType(scalingType);
         remoteRender.setMirror(false);
@@ -364,6 +398,9 @@ public class CallActivity extends Activity
 
         localRender.requestLayout();
         remoteRender.requestLayout();
+              */
+
+
     }
 
     private void startCall() {

@@ -100,7 +100,7 @@ public class ConnectActivity extends Activity {
         keyprefRoom = getString(R.string.pref_room_key);
         keyprefRoomList = getString(R.string.pref_room_list_key);
 
-        setContentView(R.layout.activity_connect);
+        this.setContentView(R.layout.activity_connect);
 
         masterEditText = (EditText) findViewById(R.id.client_edittext);
         roomEditText = (EditText) findViewById(R.id.room_edittext);
@@ -128,18 +128,6 @@ public class ConnectActivity extends Activity {
         connectButton = (ImageButton) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(connectListener);
 
-        // If an implicit VIEW intent is launching the app, go directly to that URL.
-        final Intent intent = getIntent();
-        if ("android.intent.action.VIEW".equals(intent.getAction())
-                && !commandLineRun) {
-            commandLineRun = true;
-            int runTimeMs = intent.getIntExtra(
-                    CallActivity.EXTRA_RUNTIME, 0);
-            String room = sharedPref.getString(keyprefRoom, "");
-            roomEditText.setText(room);
-            connectToRoom(runTimeMs);
-            return;
-        }
     }
 
     @Override
@@ -345,6 +333,7 @@ public class ConnectActivity extends Activity {
             intent.putExtra(CallActivity.EXTRA_VIDEO_FPS, cameraFps);
             intent.putExtra(CallActivity.EXTRA_VIDEO_CAPTUREQUALITYSLIDER_ENABLED,
                     captureQualitySlider);
+
             intent.putExtra(CallActivity.EXTRA_VIDEO_BITRATE, videoStartBitrate);
             intent.putExtra(CallActivity.EXTRA_VIDEOCODEC, videoCodec);
             intent.putExtra(CallActivity.EXTRA_HWCODEC_ENABLED, hwCodec);
