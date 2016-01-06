@@ -94,13 +94,6 @@ public class RoomParametersFetcher {
             SessionDescription offerSdp = null;
             JSONObject roomJson = new JSONObject(response);
 
-            String result = roomJson.getString("result");
-            if (!result.equals("SUCCESS")) {
-                events.onSignalingParametersError("Room response error: " + result);
-                return;
-            }
-            response = roomJson.getString("params");
-            roomJson = new JSONObject(response);
             long roomId = roomJson.getLong("room_id");
             long clientId = roomJson.getLong("client_id");
             String wssUrl = roomJson.getString("wss_url");
