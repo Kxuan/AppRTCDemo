@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,9 +16,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import android.widget.ListView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
@@ -28,10 +32,34 @@ import com.zijunlin.Zxing.view.ViewfinderView;
 
 import java.io.IOException;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QrActivity extends Activity implements Callback
 {
-
+	 private long roomId=0;
+	private long masterId=0;
+	//试验-
+	private ListView roomListView;
+	private SharedPreferences sharedPref;
+	private String keyprefVideoCallEnabled;
+	private String keyprefResolution;
+	private String keyprefFps;
+	private String keyprefCaptureQualitySlider;
+	private String keyprefVideoBitrateType;
+	private String keyprefVideoBitrateValue;
+	private String keyprefVideoCodec;
+	private String keyprefAudioBitrateType;
+	private String keyprefAudioBitrateValue;
+	private String keyprefAudioCodec;
+	private String keyprefHwCodecAcceleration;
+	private String keyprefNoAudioProcessingPipeline;
+	private String keyprefCpuUsageDetection;
+	private String keyprefDisplayHud;
+	private String keyprefRoomServerUrl;
+	private String keyprefRoom;
+	private String keyprefRoomList;
+	//-试验
 	private CaptureActivityHandler handler;
 	private ViewfinderView viewfinderView;
 	private boolean hasSurface;
@@ -47,6 +75,28 @@ public class QrActivity extends Activity implements Callback
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		//试验-
+		// Get setting keys.
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		keyprefVideoCallEnabled = getString(R.string.pref_videocall_key);
+		keyprefResolution = getString(R.string.pref_resolution_key);
+		keyprefFps = getString(R.string.pref_fps_key);
+		keyprefCaptureQualitySlider = getString(R.string.pref_capturequalityslider_key);
+		keyprefVideoBitrateType = getString(R.string.pref_startvideobitrate_key);
+		keyprefVideoBitrateValue = getString(R.string.pref_startvideobitratevalue_key);
+		keyprefVideoCodec = getString(R.string.pref_videocodec_key);
+		keyprefHwCodecAcceleration = getString(R.string.pref_hwcodec_key);
+		keyprefAudioBitrateType = getString(R.string.pref_startaudiobitrate_key);
+		keyprefAudioBitrateValue = getString(R.string.pref_startaudiobitratevalue_key);
+		keyprefAudioCodec = getString(R.string.pref_audiocodec_key);
+		keyprefNoAudioProcessingPipeline = getString(R.string.pref_noaudioprocessing_key);
+		keyprefCpuUsageDetection = getString(R.string.pref_cpu_usage_detection_key);
+		keyprefDisplayHud = getString(R.string.pref_displayhud_key);
+		keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
+		keyprefRoom = getString(R.string.pref_room_key);
+		keyprefRoomList = getString(R.string.pref_room_list_key);
+		//-试验
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.layout_qr);
 		// 初始化 CameraManager
@@ -165,6 +215,7 @@ public class QrActivity extends Activity implements Callback
 
 	public void handleDecode(final Result obj, Bitmap barcode)
 	{
+		;
 		inactivityTimer.onActivity();
 		playBeepSoundAndVibrate();
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -174,24 +225,38 @@ public class QrActivity extends Activity implements Callback
 		}
 		else
 		{
-
 			Drawable drawable = new BitmapDrawable(barcode);
 			dialog.setIcon(drawable);
 		}
-		dialog.setTitle("扫描结果");
-		dialog.setMessage(obj.toString());
+		dialog.setTitle("房间信息");
+		String ur=obj.toString();
+		Pattern pattern=Pattern.compile("^(http.*?)\\/android\\/\\?room=(\\d+)\\&master=(\\d+)");
+		Matcher matcher = pattern.matcher(obj.toString());
+
+		if(matcher.matches()) {
+			try{
+				 roomId=Long.parseLong( matcher.group(2));
+				 masterId=Long.parseLong(matcher.group(3));
+
+			}catch (NumberFormatException ex)
+			{
+				return;
+			}
+
+
+		}
+
+		//(/^(http.*?)\/android\/\?room =(\d+)\&master=(\d+)/)
+		dialog.setMessage("是否要加入房间:"+roomId+",masterId:"+masterId+"?");
+
 		dialog.setNegativeButton("确定", new DialogInterface.OnClickListener()
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				//用默认浏览器打开扫描得到的地址
-				Intent intent = new Intent();
-				intent.setAction("android.intent.action.VIEW");
-				Uri content_url = Uri.parse(obj.getText());
-				intent.setData(content_url);
-				startActivity(intent);
-				finish();
+
+				qrConnectRoom(roomId,masterId,true);
+
 			}
 		});
 		dialog.setPositiveButton("取消", new DialogInterface.OnClickListener()
@@ -203,6 +268,124 @@ public class QrActivity extends Activity implements Callback
 			}
 		});
 		dialog.create().show();
+	}
+	//拿到roomid masterid 各种配置,开始连接
+	private void qrConnectRoom(long roomId,long masterId,boolean isHelperMode)
+	{
+
+		Intent intent =new Intent(this,CallActivity.class);
+
+		String roomUrl = sharedPref.getString(
+				keyprefRoomServerUrl,
+				getString(R.string.pref_room_server_url_default));
+		Uri uri=Uri.parse(roomUrl);
+		System.out.println(uri);
+		boolean videoCallEnabled=sharedPref.getBoolean(keyprefVideoCallEnabled,Boolean.valueOf("true"));
+		// Get video resolution from settings.
+		int videoWidth = 0;
+		int videoHeight = 0;
+		String resolution = sharedPref.getString(keyprefResolution,
+				getString(R.string.pref_resolution_default));
+		String[] dimensions = resolution.split("[ x]+");
+		if (dimensions.length == 2) {
+			try {
+				videoWidth = Integer.parseInt(dimensions[0]);
+				videoHeight = Integer.parseInt(dimensions[1]);
+			} catch (NumberFormatException e) {
+				videoWidth = 0;
+				videoHeight = 0;
+				//Log.e(TAG, "Wrong video resolution setting: " + resolution);
+			}
+		}
+		// Get camera fps from settings.
+		int cameraFps = 0;
+		String fps = sharedPref.getString(keyprefFps,
+				getString(R.string.pref_fps_default));
+		String[] fpsValues = fps.split("[ x]+");
+		if (fpsValues.length == 2) {
+			try {
+				cameraFps = Integer.parseInt(fpsValues[0]);
+			} catch (NumberFormatException e) {
+				//Log.e(TAG, "Wrong camera fps setting: " + fps);
+			}
+		}
+		// Check capture quality slider flag.
+		boolean captureQualitySlider = sharedPref.getBoolean(keyprefCaptureQualitySlider,
+				Boolean.valueOf(getString(R.string.pref_capturequalityslider_default)));
+
+		// Get video and audio start bitrate.
+		int videoStartBitrate = 0;
+		String bitrateTypeDefault = getString(
+				R.string.pref_startvideobitrate_default);
+		String bitrateType = sharedPref.getString(
+				keyprefVideoBitrateType, bitrateTypeDefault);
+		if (!bitrateType.equals(bitrateTypeDefault)) {
+			String bitrateValue = sharedPref.getString(keyprefVideoBitrateValue,
+					getString(R.string.pref_startvideobitratevalue_default));
+			videoStartBitrate = Integer.parseInt(bitrateValue);
+		}
+
+		// Get default codecs.
+		String videoCodec = sharedPref.getString(keyprefVideoCodec,
+				getString(R.string.pref_videocodec_default));
+		String audioCodec = sharedPref.getString(keyprefAudioCodec,
+				getString(R.string.pref_audiocodec_default));
+
+		// Check HW codec flag.
+		boolean hwCodec = sharedPref.getBoolean(keyprefHwCodecAcceleration,
+				Boolean.valueOf(getString(R.string.pref_hwcodec_default)));
+
+		// Check Disable Audio Processing flag.
+		boolean noAudioProcessing = sharedPref.getBoolean(
+				keyprefNoAudioProcessingPipeline,
+				Boolean.valueOf(getString(R.string.pref_noaudioprocessing_default)));
+		int audioStartBitrate = 0;
+		bitrateTypeDefault = getString(R.string.pref_startaudiobitrate_default);
+		bitrateType = sharedPref.getString(
+				keyprefAudioBitrateType, bitrateTypeDefault);
+		if (!bitrateType.equals(bitrateTypeDefault)) {
+			String bitrateValue = sharedPref.getString(keyprefAudioBitrateValue,
+					getString(R.string.pref_startaudiobitratevalue_default));
+			audioStartBitrate = Integer.parseInt(bitrateValue);
+		}
+
+		// Test if CpuOveruseDetection should be disabled. By default is on.
+		boolean cpuOveruseDetection = sharedPref.getBoolean(
+				keyprefCpuUsageDetection,
+				Boolean.valueOf(
+						getString(R.string.pref_cpu_usage_detection_default)));
+
+		// Check statistics display option.
+		boolean displayHud = sharedPref.getBoolean(keyprefDisplayHud,
+				Boolean.valueOf(getString(R.string.pref_displayhud_default)));
+
+		intent.setData(uri);
+		intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
+		intent.putExtra(CallActivity.EXTRA_HELPER_MODE, isHelperMode);
+		intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
+
+		intent.putExtra(CallActivity.EXTRA_VIDEO_CALL, videoCallEnabled);
+		intent.putExtra(CallActivity.EXTRA_VIDEO_WIDTH, videoWidth);
+		intent.putExtra(CallActivity.EXTRA_VIDEO_HEIGHT, videoHeight);
+		intent.putExtra(CallActivity.EXTRA_VIDEO_FPS, cameraFps);
+		intent.putExtra(CallActivity.EXTRA_VIDEO_CAPTUREQUALITYSLIDER_ENABLED,
+				captureQualitySlider);
+		intent.putExtra(CallActivity.EXTRA_VIDEO_BITRATE, videoStartBitrate);
+		intent.putExtra(CallActivity.EXTRA_VIDEOCODEC, videoCodec);
+		intent.putExtra(CallActivity.EXTRA_HWCODEC_ENABLED, hwCodec);
+		intent.putExtra(CallActivity.EXTRA_NOAUDIOPROCESSING_ENABLED,
+				noAudioProcessing);
+		intent.putExtra(CallActivity.EXTRA_AUDIO_BITRATE, audioStartBitrate);
+		intent.putExtra(CallActivity.EXTRA_AUDIOCODEC, audioCodec);
+		intent.putExtra(CallActivity.EXTRA_CPUOVERUSE_DETECTION,
+				cpuOveruseDetection);
+		intent.putExtra(CallActivity.EXTRA_DISPLAY_HUD, displayHud);
+		//intent.putExtra(CallActivity.EXTRA_CMDLINE, commandLineRun);
+		//intent.putExtra(CallActivity.EXTRA_RUNTIME, runTimeMs);
+		startActivity(intent);
+		finish();
+
+
 	}
 
 	private void initBeepSound()
