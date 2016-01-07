@@ -120,6 +120,11 @@ public class WebSocketRTCClient implements AppRTCClient,
 
     // Disconnect from room and send bye messages - runs on a local looper thread.
     private void disconnectFromRoomInternal() {
+
+        JSONObject json = new JSONObject();
+        jsonPut(json, "cmd", "leave");
+        wsClient.send(json.toString());
+
         Log.d(TAG, "Disconnect. Room state: " + roomState);
         if (roomState == ConnectionState.CONNECTED) {
             Log.d(TAG, "Closing room.");
@@ -159,7 +164,7 @@ public class WebSocketRTCClient implements AppRTCClient,
     @Override
     public void sendOfferSdp(final long peerId, final SessionDescription sdp, final boolean isHelper) {
 
-        Log.w(TAG, "Calling sendOfferSdp", new Exception());
+        Log.w(TAG, "Calling sendOfferSdp");
 
         executor.execute(new Runnable() {
             @Override
