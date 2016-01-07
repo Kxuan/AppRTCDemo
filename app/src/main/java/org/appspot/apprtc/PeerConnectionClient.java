@@ -52,6 +52,7 @@ import javax.microedition.khronos.egl.EGLContext;
  * This class is a singleton.
  */
 public class PeerConnectionClient {
+    private boolean isHelperMode;
     public static final String VIDEO_TRACK_ID = "ARDAMSv0";
     public static final String AUDIO_TRACK_ID = "ARDAMSa0";
     private static final String TAG = "PCRTCClient";
@@ -92,6 +93,7 @@ public class PeerConnectionClient {
     private PeerConnection peerConnection;
     //对端客户ID
     private long peerId;
+
 
     PeerConnectionFactory.Options options = null;
     private VideoSource videoSource;
@@ -253,17 +255,20 @@ public class PeerConnectionClient {
         });
     }
 
+    //新添加的一个isHelperMode参数,从CallActivity来的
     public void createPeerConnection(
             long peerId,
             final EGLContext renderEGLContext,
             final VideoRenderer.Callbacks localRender,
             final VideoRenderer.Callbacks remoteRender,
-            final SignalingParameters signalingParameters) {
+            final SignalingParameters signalingParameters,
+            boolean isHelperMode) {
         if (peerConnectionParameters == null) {
             Log.e(TAG, "Creating peer connection without initializing factory.");
             return;
         }
-
+        //保存接收的ishelpermode参数
+        this.isHelperMode=isHelperMode;
         //绑定对端ID
         this.peerId = peerId;
         this.localRender = localRender;
@@ -286,6 +291,7 @@ public class PeerConnectionClient {
             }
         });
     }
+
 
     public boolean isVideoCallEnabled() {
         return videoCallEnabled;
@@ -328,7 +334,7 @@ public class PeerConnectionClient {
         }
         Log.d(TAG, "Peer connection factory created.");
     }
-
+//sdpMediaConstraints
     private void createMediaConstraintsInternal() {
         // Create peer connection constraints.
         pcConstraints = new MediaConstraints();
@@ -398,10 +404,21 @@ public class PeerConnectionClient {
                     AUDIO_NOISE_SUPPRESSION_CONSTRAINT, "false"));
         }
         // Create SDP constraints.
+
         sdpMediaConstraints = new MediaConstraints();
-        sdpMediaConstraints.mandatory.add(new KeyValuePair(
-                "OfferToReceiveAudio", "true"));
-        if (videoCallEnabled) {
+        //如果是助手模式,设为false,不等待远端消息
+        if(isHelperMode)
+        {
+            sdpMediaConstraints.mandatory.add(new KeyValuePair(
+                "OfferToReceiveAudio", "false"));
+        }
+        else//否则设为true,等待远端消息
+        {
+            sdpMediaConstraints.mandatory.add(new KeyValuePair(
+                    "OfferToReceiveAudio", "true"));
+        }
+
+        if (videoCallEnabled &&!isHelperMode) {
             sdpMediaConstraints.mandatory.add(new KeyValuePair(
                     "OfferToReceiveVideo", "true"));
         } else {
@@ -575,7 +592,9 @@ public class PeerConnectionClient {
         });
     }
 
-    public void createOffer() {
+    //如果是helperMode 就把等待远端视频false,通过sdpMediaConstraints 设置
+    public void createOffer( ) {
+
         executor.execute(new Runnable() {
             @Override
             public void run() {

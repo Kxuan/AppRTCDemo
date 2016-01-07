@@ -46,7 +46,7 @@
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:id="@+id/qr_button"
-            android:background="@drawable/disconnect"
+            android:background="@drawable/qr"
             android:layout_weight="0.05" />
     </LinearLayout>
 

@@ -347,7 +347,6 @@ public class CallActivity extends Activity
     }
 
     private void updateVideoView() {
-logAndToast("是不是助手模式:"+isHelperMode);
         //如果是助手模式,就把本地视频全屏(不管远程)
         if(isHelperMode)
         {
@@ -360,6 +359,7 @@ logAndToast("是不是助手模式:"+isHelperMode);
         }
         else
         {
+            //普通模式
             remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
             remoteRender.setScalingType(scalingType);
             remoteRender.setMirror(false);
@@ -541,7 +541,7 @@ logAndToast("是不是助手模式:"+isHelperMode);
         //如果当前是助手模式，则尝试连接主控端
         if (isHelperMode) {
             peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
-                    localRender, remoteRender, signalingParameters);
+                    localRender, remoteRender, signalingParameters,isHelperMode);
             peerConnectionClient.createOffer();
             logAndToast("Creating peer connection, delay=" + delta + "ms");
         } else {
@@ -651,8 +651,8 @@ logAndToast("是不是助手模式:"+isHelperMode);
                     } else {
                         //不支持非助手模式
                         throw new IllegalStateException("非助手模式");
-                        //long peerId = peerConnectionClient.getPeerId();
-                        //appRtcClient.sendAnswerSdp(peerId, sdp);
+//                        long peerId = peerConnectionClient.getPeerId();
+//                        appRtcClient.sendAnswerSdp(peerId, sdp);
                     }
                     logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
                 }
