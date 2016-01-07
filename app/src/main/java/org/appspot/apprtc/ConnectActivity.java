@@ -50,13 +50,10 @@ public class ConnectActivity extends Activity {
 
     private ImageButton qrButton;//二维码识别按钮
 
-    private ImageButton addRoomButton;
-    private ImageButton removeRoomButton;
     private ImageButton connectButton;
     private EditText roomEditText;
     private EditText masterEditText;
 
-    private ListView roomListView;
     private SharedPreferences sharedPref;
     private String keyprefVideoCallEnabled;
     private String keyprefResolution;
@@ -74,9 +71,6 @@ public class ConnectActivity extends Activity {
     private String keyprefDisplayHud;
     private String keyprefRoomServerUrl;
     private String keyprefRoom;
-    private String keyprefRoomList;
-    private ArrayList<String> roomList;
-    private ArrayAdapter<String> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,38 +95,19 @@ public class ConnectActivity extends Activity {
         keyprefDisplayHud = getString(R.string.pref_displayhud_key);
         keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
         keyprefRoom = getString(R.string.pref_room_key);
-        keyprefRoomList = getString(R.string.pref_room_list_key);
 
         this.setContentView(R.layout.activity_connect);
 
         masterEditText = (EditText) findViewById(R.id.client_edittext);
         roomEditText = (EditText) findViewById(R.id.room_edittext);
-        roomEditText.setOnEditorActionListener(
-                new TextView.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(
-                            TextView textView, int i, KeyEvent keyEvent) {
-                        if (i == EditorInfo.IME_ACTION_DONE) {
-                            addRoomButton.performClick();
-                            return true;
-                        }
-                        return false;
-                    }
-                });
         roomEditText.requestFocus();
 
-        roomListView = (ListView) findViewById(R.id.room_listview);
-        roomListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         //找到布局中的二维码按钮
         qrButton = (ImageButton) findViewById(R.id.qr_button);
         //绑定二维码的点击事件,参数为事件
         qrButton.setOnClickListener(qrListener);
 
-        addRoomButton = (ImageButton) findViewById(R.id.add_room_button);
-        addRoomButton.setOnClickListener(addRoomListener);
-        removeRoomButton = (ImageButton) findViewById(R.id.remove_room_button);
-        removeRoomButton.setOnClickListener(removeRoomListener);
         connectButton = (ImageButton) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(connectListener);
 
@@ -160,10 +135,8 @@ public class ConnectActivity extends Activity {
     public void onPause() {
         super.onPause();
         String room = roomEditText.getText().toString();
-        String roomListJson = new JSONArray(roomList).toString();
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(keyprefRoom, room);
-        editor.putString(keyprefRoomList, roomListJson);
         editor.commit();
     }
 
@@ -172,25 +145,6 @@ public class ConnectActivity extends Activity {
         super.onResume();
         String room = sharedPref.getString(keyprefRoom, "");
         roomEditText.setText(room);
-        roomList = new ArrayList<String>();
-        String roomListJson = sharedPref.getString(keyprefRoomList, null);
-        if (roomListJson != null) {
-            try {
-                JSONArray jsonArray = new JSONArray(roomListJson);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    roomList.add(jsonArray.get(i).toString());
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, "Failed to load room list: " + e.toString());
-            }
-        }
-        adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_list_item_1, roomList);
-        roomListView.setAdapter(adapter);
-        if (adapter.getCount() > 0) {
-            roomListView.requestFocus();
-            roomListView.setItemChecked(0, true);
-        }
     }
 
     @Override
@@ -218,11 +172,7 @@ public class ConnectActivity extends Activity {
         long masterId = -1, roomId;
         String stringMasterId, stringRoomId;
 
-        stringRoomId = getSelectedItem();
-        if (stringRoomId == null) {
-            stringRoomId = roomEditText.getText().toString();
-        }
-
+        stringRoomId = roomEditText.getText().toString().trim();
         stringMasterId = masterEditText.getText().toString().trim();
 
         try {
@@ -394,42 +344,5 @@ public class ConnectActivity extends Activity {
         startActivity(intent);
     }
 
-
-    private final OnClickListener addRoomListener = new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String newRoom = roomEditText.getText().toString();
-            if (newRoom.length() > 0 && !roomList.contains(newRoom)) {
-                adapter.add(newRoom);
-                adapter.notifyDataSetChanged();
-            }
-        }
-    };
-
-    private final OnClickListener removeRoomListener = new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String selectedRoom = getSelectedItem();
-            if (selectedRoom != null) {
-                adapter.remove(selectedRoom);
-                adapter.notifyDataSetChanged();
-            }
-        }
-    };
-
-    private String getSelectedItem() {
-        int position = AdapterView.INVALID_POSITION;
-        if (roomListView.getCheckedItemCount() > 0 && adapter.getCount() > 0) {
-            position = roomListView.getCheckedItemPosition();
-            if (position >= adapter.getCount()) {
-                position = AdapterView.INVALID_POSITION;
-            }
-        }
-        if (position != AdapterView.INVALID_POSITION) {
-            return adapter.getItem(position);
-        } else {
-            return null;
-        }
-    }
 
 }

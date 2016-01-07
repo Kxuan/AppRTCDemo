@@ -23,7 +23,6 @@
 
     <!-- Settings strings. -->
     <string name="pref_room_key">room_preference</string>
-    <string name="pref_room_list_key">room_list_preference</string>
 
     <string name="pref_videosettings_key">video_settings_key</string>
     <string name="pref_videosettings_title">WebRTC video settings.</string>

@@ -58,7 +58,6 @@ public class QrActivity extends Activity implements Callback
 	private String keyprefDisplayHud;
 	private String keyprefRoomServerUrl;
 	private String keyprefRoom;
-	private String keyprefRoomList;
 	//-试验
 	private CaptureActivityHandler handler;
 	private ViewfinderView viewfinderView;
@@ -95,7 +94,6 @@ public class QrActivity extends Activity implements Callback
 		keyprefDisplayHud = getString(R.string.pref_displayhud_key);
 		keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
 		keyprefRoom = getString(R.string.pref_room_key);
-		keyprefRoomList = getString(R.string.pref_room_list_key);
 		//-试验
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.layout_qr);
