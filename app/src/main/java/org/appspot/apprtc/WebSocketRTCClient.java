@@ -17,6 +17,7 @@ import org.appspot.apprtc.util.LooperExecutor;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.IceCandidate;
@@ -62,6 +63,7 @@ public class WebSocketRTCClient implements AppRTCClient,
         roomState = ConnectionState.NEW;
         executor.requestStart();
     }
+
 
     // --------------------------------------------------------------------
     // AppRTCClient interface implementation.
@@ -150,10 +152,15 @@ public class WebSocketRTCClient implements AppRTCClient,
         Log.d(TAG, "Room connection completed.");
         roomState = ConnectionState.CONNECTED;
 
+
         // Connect and register WebSocket client.
         wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
         wsClient.register(connectionParameters.roomId, signalingParameters.clientId);
 
+        //请求房间信息,都有哪些用户在
+        JSONObject json = new JSONObject();
+        jsonPut(json, "cmd", "room");
+        wsClient.send(json.toString());
         Log.d(TAG, "signal connected");
 
         // Fire connection and signaling parameters events.
@@ -293,6 +300,25 @@ public class WebSocketRTCClient implements AppRTCClient,
                     long fromPeerId = json.getLong("id");
                     events.onClientJoin(fromPeerId, json.getString("device"));
                     break;
+                }
+                case "room": {
+                    // long fromPeerId=json.getLong("id");
+                    long roomID = json.getLong("id");
+                    JSONArray jsonArray;
+                    jsonArray = json.getJSONArray("clients");
+
+                    //拿到所有的客户id和设备类型,加载到选择列表供用户选择
+                    ClientInfo[] clientIdString = new ClientInfo[jsonArray.length()];
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        long clientId = 0;
+                        String device = null;
+                        JSONObject jsonClient = (JSONObject) jsonArray.get(i);
+                        clientId = jsonClient.getLong("id");
+                        device = jsonClient.getString("device");
+                        clientIdString[i] = new ClientInfo(clientId, device);
+                    }
+
+                    events.selectClientItem(clientIdString);
                 }
                 default:
                     Log.w(TAG, "Unexpected WebSocket message :" + msg);

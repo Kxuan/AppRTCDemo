@@ -13,7 +13,6 @@ package org.appspot.apprtc;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
-
 import java.util.List;
 
 /**
@@ -113,6 +112,9 @@ public interface AppRTCClient {
         void onRemoteAnswer(long peerId, final SessionDescription sdp);
 
         void onClientJoin(long peerId, String deviceType);
+
+        //显示客户端列表
+        void selectClientItem(ClientInfo[] clientIdString);
 
         /**
          * Callback fired once remote Ice candidate is received.

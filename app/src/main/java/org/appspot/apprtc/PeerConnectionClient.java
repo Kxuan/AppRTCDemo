@@ -265,6 +265,7 @@ public class PeerConnectionClient {
             boolean isHelperMode) {
         if (peerConnectionParameters == null) {
             Log.e(TAG, "Creating peer connection without initializing factory.");
+
             return;
         }
         //保存接收的ishelpermode参数
@@ -592,7 +593,7 @@ public class PeerConnectionClient {
         });
     }
 
-    //如果是helperMode 就把等待远端视频false,通过sdpMediaConstraints 设置
+
     public void createOffer( ) {
 
         executor.execute(new Runnable() {

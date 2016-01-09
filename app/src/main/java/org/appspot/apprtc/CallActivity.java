@@ -30,12 +30,20 @@ import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.SurfaceViewRenderer;
+
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Activity for peer connection call setup, call waiting
@@ -88,7 +96,6 @@ public class CallActivity extends Activity
             "android.permission.RECORD_AUDIO",
             "android.permission.INTERNET"
     };
-
     // Peer connection statistics callback period in ms.
     private static final int STAT_CALLBACK_PERIOD = 1000;
     // Local preview screen position before call is connected.
@@ -135,6 +142,11 @@ public class CallActivity extends Activity
     // Controls
     CallFragment callFragment;
     HudFragment hudFragment;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -197,7 +209,7 @@ public class CallActivity extends Activity
             }
         }
 
-            // Get Intent parameters.
+        // Get Intent parameters.
         //得到房间信息的一些参数
         final Intent intent = getIntent();
         Uri roomUri = intent.getData();
@@ -269,6 +281,9 @@ public class CallActivity extends Activity
         peerConnectionClient = PeerConnectionClient.getInstance();
         peerConnectionClient.createPeerConnectionFactory(
                 CallActivity.this, peerConnectionParameters, CallActivity.this);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     // Activity interfaces
@@ -348,17 +363,14 @@ public class CallActivity extends Activity
 
     private void updateVideoView() {
         //如果是助手模式,就把本地视频全屏(不管远程)
-        if(isHelperMode)
-        {
+        if (isHelperMode) {
             logAndToast("助手模式,全屏");
             localRenderLayout.setPosition(
                     LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
             localRender.setScalingType(scalingType);
 
 
-        }
-        else
-        {
+        } else {
             //普通模式
             remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
             remoteRender.setScalingType(scalingType);
@@ -541,11 +553,13 @@ public class CallActivity extends Activity
         //如果当前是助手模式，则尝试连接主控端
         if (isHelperMode) {
             peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
-                    localRender, remoteRender, signalingParameters,isHelperMode);
+                    localRender, remoteRender, signalingParameters, isHelperMode);
             peerConnectionClient.createOffer();
             logAndToast("Creating peer connection, delay=" + delta + "ms");
         } else {
-            //否则等待接收offer
+            //普通模式
+
+
         }
     }
 
@@ -561,34 +575,38 @@ public class CallActivity extends Activity
 
     @Override
     public void onRemoteOffer(long peerId, SessionDescription sdp) {
-        //目前不支持非助手模式，所以拒绝一切邀请
-        Log.e(TAG, "拒绝来自" + Long.toString(peerId) + "的邀请");
-        appRtcClient.sendAnswerSdp(peerId, null);
+        //目前不支持非助手模式，所以拒绝一切邀请,null为拒绝
+        if (sdp != null) {
+            appRtcClient.sendAnswerSdp(peerId, sdp);
+        } else {
+            Log.e(TAG, "拒绝来自" + Long.toString(peerId) + "的邀请");
+        }
     }
 
     @Override
     public void onRemoteAnswer(long peerId, final SessionDescription sdp) {
         final long delta = System.currentTimeMillis() - callStartedTimeMs;
 
-        //如果当前非助手模式，或者是助手模式但应答answer的对端与masterId不符
+        //如果应答answer的对端与masterId不符
         // 则忽略这条answer
-        if (!isHelperMode || peerId != masterId) {
+        if (peerId != masterId) {
             Log.e(TAG, "忽略来自" + Long.toString(peerId) + "的应答");
             return;
         }
-
         if (peerConnectionClient == null) {
             Log.e(TAG, "Received remote SDP for non-initilized peer connection.");
             return;
         }
-
         if (sdp == null) {
             logAndToast("对端拒绝邀请");
             return;
         }
 
+//发起连接
         logAndToast("Received remote " + sdp.type + ", delay=" + delta + "ms");
         peerConnectionClient.setRemoteDescription(sdp);
+
+
     }
 
     @Override
@@ -600,6 +618,30 @@ public class CallActivity extends Activity
 
         }
     }
+
+    @Override
+    public void selectClientItem(final ClientInfo[] clients) {
+        String[] names = new String[clients.length];
+        for (int i = 0; i < clients.length; i++) {
+            names[i] = clients[i].toString();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(CallActivity.this);
+        builder.setTitle("请选择要连接的客户端");
+        builder.setItems(names,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        masterId = clients[which].getClientId();
+                        Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
+                        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
+                                localRender, remoteRender, signalingParameters, isHelperMode);
+                        peerConnectionClient.createOffer();
+                    }
+                });
+
+        builder.show();
+    }
+
 
     @Override
     public void onRemoteIceCandidate(long peerId, final IceCandidate candidate) {
@@ -645,15 +687,9 @@ public class CallActivity extends Activity
                 if (appRtcClient != null) {
                     //本地sdp已就绪
 
-                    if (isHelperMode) {
-                        //如果当前是助手模式，则向Master发送rtc邀请,true：助手模式
-                        appRtcClient.sendOfferSdp(masterId, sdp, true);
-                    } else {
-                        //不支持非助手模式
-                        throw new IllegalStateException("非助手模式");
-//                        long peerId = peerConnectionClient.getPeerId();
-//                        appRtcClient.sendAnswerSdp(peerId, sdp);
-                    }
+                    appRtcClient.sendOfferSdp(masterId, sdp, isHelperMode);
+
+
                     logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
                 }
             }
@@ -662,8 +698,6 @@ public class CallActivity extends Activity
 
     @Override
     public void onIceCandidate(final IceCandidate candidate) {
-        if (!this.isHelperMode)
-            throw new RuntimeException("不在助手模式");
 
         runOnUiThread(new Runnable() {
             @Override
@@ -719,5 +753,45 @@ public class CallActivity extends Activity
     @Override
     public void onPeerConnectionError(final String description) {
         reportError(description);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Call Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://org.appspot.apprtc/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Call Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://org.appspot.apprtc/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }

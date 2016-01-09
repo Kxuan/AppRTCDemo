@@ -245,7 +245,7 @@ public class QrActivity extends Activity implements Callback
 		}
 
 		//(/^(http.*?)\/android\/\?room =(\d+)\&master=(\d+)/)
-		dialog.setMessage("是否要加入房间:"+roomId+",masterId:"+masterId+"?");
+		dialog.setMessage("是否做为房间:"+roomId+"的辅助设备?");
 
 		dialog.setNegativeButton("确定", new DialogInterface.OnClickListener()
 		{

@@ -15,8 +15,8 @@ android {
         minSdkVersion 14
         targetSdkVersion 19
 
-        versionCode 10532
-        versionName "r10532"
+        versionCode 1
+        versionName "1.9"
 
         testApplicationId "org.appspot.apprtc.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -39,4 +39,5 @@ dependencies {
     compile files('libs/libjingle_peerconnection.jar')
     compile files('libs/zxing.jar')
     compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

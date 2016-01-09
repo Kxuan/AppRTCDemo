@@ -185,7 +185,7 @@ public class ConnectActivity extends Activity {
             return;
         }
 
-
+//房间地址
         String roomUrl = sharedPref.getString(
                 keyprefRoomServerUrl,
                 getString(R.string.pref_room_server_url_default));
