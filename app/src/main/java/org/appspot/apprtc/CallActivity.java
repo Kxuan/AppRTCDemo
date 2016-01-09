@@ -34,6 +34,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.json.JSONObject;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
@@ -267,7 +268,7 @@ public class CallActivity extends Activity
         ft.add(R.id.call_fragment_container, callFragment);
         ft.add(R.id.hud_fragment_container, hudFragment);
         ft.commit();
-        startCall();
+        startCall(isHelperMode);
 
         // For command line execution run connection for <runTimeMs> and exit.
         if (commandLineRun && runTimeMs > 0) {
@@ -415,7 +416,7 @@ public class CallActivity extends Activity
 
     }
 
-    private void startCall() {
+    private void startCall(boolean isHelperMode) {
         if (appRtcClient == null) {
             Log.e(TAG, "AppRTC client is not allocated for a call.");
             return;
@@ -558,7 +559,8 @@ public class CallActivity extends Activity
             logAndToast("Creating peer connection, delay=" + delta + "ms");
         } else {
             //普通模式
-
+            //请求房间信息,都有哪些用户在
+            appRtcClient.requestRoomInfo();
 
         }
     }
@@ -621,6 +623,11 @@ public class CallActivity extends Activity
 
     @Override
     public void selectClientItem(final ClientInfo[] clients) {
+        //是助手模式,return
+        if(isHelperMode)
+        {
+            return;
+        }
         String[] names = new String[clients.length];
         for (int i = 0; i < clients.length; i++) {
             names[i] = clients[i].toString();

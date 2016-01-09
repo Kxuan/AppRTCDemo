@@ -65,6 +65,20 @@ public class WebSocketRTCClient implements AppRTCClient,
     }
 
 
+    @Override
+    public void requestRoomInfo() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                JSONObject json = new JSONObject();
+                jsonPut(json, "cmd", "room");
+                wsClient.send(json.toString());
+                Log.d(TAG, "signal connected");
+            }
+        });
+
+    }
+
     // --------------------------------------------------------------------
     // AppRTCClient interface implementation.
     // Asynchronously connect to an AppRTC room URL using supplied connection
@@ -157,11 +171,6 @@ public class WebSocketRTCClient implements AppRTCClient,
         wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
         wsClient.register(connectionParameters.roomId, signalingParameters.clientId);
 
-        //请求房间信息,都有哪些用户在
-        JSONObject json = new JSONObject();
-        jsonPut(json, "cmd", "room");
-        wsClient.send(json.toString());
-        Log.d(TAG, "signal connected");
 
         // Fire connection and signaling parameters events.
         events.onConnectedToRoom(signalingParameters);

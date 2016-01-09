@@ -33,7 +33,7 @@ public interface AppRTCClient {
             this.roomId = roomId;
         }
     }
-
+    public void requestRoomInfo();
     /**
      * Asynchronously connect to an AppRTC room URL using supplied connection
      * parameters. Once connection is established onConnectedToRoom()
