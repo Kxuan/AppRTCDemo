@@ -121,6 +121,9 @@ public interface AppRTCClient {
          */
         public void onRemoteIceCandidate(long peerId, final IceCandidate candidate);
 
+
+        public void onRemoteLeave(long remoteLeaveId);
+
         /**
          * Callback fired once channel is closed.
          */

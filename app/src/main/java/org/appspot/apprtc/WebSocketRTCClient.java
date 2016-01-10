@@ -39,6 +39,7 @@ public class WebSocketRTCClient implements AppRTCClient,
     private static final String ROOM_JOIN = "join";
     private static final String ROOM_MESSAGE = "message";
     private static final String ROOM_LEAVE = "leave";
+    private long localClientId;
 
     private enum ConnectionState {
         NEW, CONNECTED, CLOSED, ERROR
@@ -166,6 +167,8 @@ public class WebSocketRTCClient implements AppRTCClient,
         Log.d(TAG, "Room connection completed.");
         roomState = ConnectionState.CONNECTED;
 
+        //本机的客户端ID
+        localClientId = signalingParameters.clientId;
 
         // Connect and register WebSocket client.
         wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
@@ -305,33 +308,43 @@ public class WebSocketRTCClient implements AppRTCClient,
                     events.onRemoteIceCandidate(fromPeerId, candidate);
                     break;
                 }
+
+                case "leave": {
+                    long leaveId=json.getLong("id");
+                    Log.d(TAG,"leaveId:"+leaveId);
+                    events.onRemoteLeave(leaveId);
+
+                }
                 case "join": {
                     long fromPeerId = json.getLong("id");
                     events.onClientJoin(fromPeerId, json.getString("device"));
                     break;
                 }
                 case "room": {
-                    // long fromPeerId=json.getLong("id");
-                    long roomID = json.getLong("id");
                     JSONArray jsonArray;
                     jsonArray = json.getJSONArray("clients");
-
+                    if (jsonArray.length() == 1) {
+                        //房间只有自己，先return
+                        return;
+                    }
                     //拿到所有的客户id和设备类型,加载到选择列表供用户选择
-                    ClientInfo[] clientIdString = new ClientInfo[jsonArray.length()];
+                    ClientInfo[] clientIdString = new ClientInfo[jsonArray.length() - 1];
+                    int j = 0;
                     for (int i = 0; i < jsonArray.length(); i++) {
                         long clientId = 0;
                         String device = null;
                         JSONObject jsonClient = (JSONObject) jsonArray.get(i);
                         clientId = jsonClient.getLong("id");
                         device = jsonClient.getString("device");
-                        clientIdString[i] = new ClientInfo(clientId, device);
+                        //显示的是本机设备,localClientId,本机设备的Id，client服务器返回的id
+                        if (clientId != localClientId) {
+                            clientIdString[j++] = new ClientInfo(clientId, device);
+                        }
                     }
-
                     events.selectClientItem(clientIdString);
                 }
                 default:
                     Log.w(TAG, "Unexpected WebSocket message :" + msg);
-                    //reportError("Unexpected WebSocket message: " + msg);
             }
 
         } catch (JSONException e) {

@@ -268,7 +268,7 @@ public class CallActivity extends Activity
         ft.add(R.id.call_fragment_container, callFragment);
         ft.add(R.id.hud_fragment_container, hudFragment);
         ft.commit();
-        startCall(isHelperMode);
+        startCall();
 
         // For command line execution run connection for <runTimeMs> and exit.
         if (commandLineRun && runTimeMs > 0) {
@@ -416,7 +416,7 @@ public class CallActivity extends Activity
 
     }
 
-    private void startCall(boolean isHelperMode) {
+    private void startCall() {
         if (appRtcClient == null) {
             Log.e(TAG, "AppRTC client is not allocated for a call.");
             return;
@@ -577,7 +577,7 @@ public class CallActivity extends Activity
 
     @Override
     public void onRemoteOffer(long peerId, SessionDescription sdp) {
-        //目前不支持非助手模式，所以拒绝一切邀请,null为拒绝
+        //null为拒绝
         if (sdp != null) {
             appRtcClient.sendAnswerSdp(peerId, sdp);
         } else {
@@ -624,8 +624,7 @@ public class CallActivity extends Activity
     @Override
     public void selectClientItem(final ClientInfo[] clients) {
         //是助手模式,return
-        if(isHelperMode)
-        {
+        if (isHelperMode) {
             return;
         }
         String[] names = new String[clients.length];
@@ -649,6 +648,19 @@ public class CallActivity extends Activity
         builder.show();
     }
 
+    //远程挂断,本地断开连接，要判断是否
+    @Override
+    public void onRemoteLeave(final long leaveID) {
+        if (leaveID>0) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    logAndToast("Remote leave:" + leaveID);
+                    disconnect();
+                }
+            });
+        }
+    }
 
     @Override
     public void onRemoteIceCandidate(long peerId, final IceCandidate candidate) {
