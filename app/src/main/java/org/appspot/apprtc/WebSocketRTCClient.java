@@ -313,6 +313,7 @@ public class WebSocketRTCClient implements AppRTCClient,
                     long leaveId=json.getLong("id");
                     Log.d(TAG,"leaveId:"+leaveId);
                     events.onRemoteLeave(leaveId);
+                    break;
 
                 }
                 case "join": {
@@ -342,6 +343,7 @@ public class WebSocketRTCClient implements AppRTCClient,
                         }
                     }
                     events.selectClientItem(clientIdString);
+                    break;
                 }
                 default:
                     Log.w(TAG, "Unexpected WebSocket message :" + msg);

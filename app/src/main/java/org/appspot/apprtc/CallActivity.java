@@ -638,7 +638,7 @@ public class CallActivity extends Activity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         masterId = clients[which].getClientId();
-                        Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
                         peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
                                 localRender, remoteRender, signalingParameters, isHelperMode);
                         peerConnectionClient.createOffer();
@@ -651,7 +651,7 @@ public class CallActivity extends Activity
     //远程挂断,本地断开连接，要判断是否
     @Override
     public void onRemoteLeave(final long leaveID) {
-        if (leaveID>0) {
+        if (leaveID == masterId) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -659,6 +659,9 @@ public class CallActivity extends Activity
                     disconnect();
                 }
             });
+
+        } else {
+            return;
         }
     }
 
