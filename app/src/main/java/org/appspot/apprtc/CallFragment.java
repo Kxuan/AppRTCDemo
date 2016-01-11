@@ -31,6 +31,7 @@ public class CallFragment extends Fragment {
   private ImageButton disconnectButton;
   private ImageButton cameraSwitchButton;
   private ImageButton videoScalingButton;
+  private ImageButton selectClientButton;
   private TextView captureFormatText;
   private SeekBar captureFormatSlider;
   private OnCallEvents callEvents;
@@ -43,6 +44,7 @@ public class CallFragment extends Fragment {
   public interface OnCallEvents {
     public void onCallHangUp();
     public void onCameraSwitch();
+    public void onSelectClient();
     public void onVideoScalingSwitch(ScalingType scalingType);
     public void onCaptureFormatChange(int width, int height, int framerate);
   }
@@ -62,6 +64,9 @@ public class CallFragment extends Fragment {
         (ImageButton) controlView.findViewById(R.id.button_call_switch_camera);
     videoScalingButton =
         (ImageButton) controlView.findViewById(R.id.button_call_scaling_mode);
+    //切换客户端按钮
+    selectClientButton =
+            (ImageButton) controlView.findViewById(R.id.select_Client);
     captureFormatText =
         (TextView) controlView.findViewById(R.id.capture_format_text_call);
     captureFormatSlider =
@@ -72,6 +77,13 @@ public class CallFragment extends Fragment {
       @Override
       public void onClick(View view) {
         callEvents.onCallHangUp();
+      }
+    });
+
+    selectClientButton.setOnClickListener(new View.OnClickListener(){
+      @Override
+    public void onClick(View view){
+        callEvents.onSelectClient();
       }
     });
 

@@ -331,9 +331,11 @@ public class WebSocketRTCClient implements AppRTCClient,
                     //拿到所有的客户id和设备类型,加载到选择列表供用户选择
                     ClientInfo[] clientIdString = new ClientInfo[jsonArray.length() - 1];
                     int j = 0;
+                    long clientId = 0;
+                    String device = null;
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        long clientId = 0;
-                        String device = null;
+//                        long clientId = 0;
+//                        String device = null;
                         JSONObject jsonClient = (JSONObject) jsonArray.get(i);
                         clientId = jsonClient.getLong("id");
                         device = jsonClient.getString("device");
@@ -342,7 +344,14 @@ public class WebSocketRTCClient implements AppRTCClient,
                             clientIdString[j++] = new ClientInfo(clientId, device);
                         }
                     }
-                    events.selectClientItem(clientIdString);
+                    //只有2个客户端，就直接建立连接
+                    if(jsonArray.length() == 2)
+                    {
+                        events.connect(clientIdString[0].getClientId());
+                    }
+                    else {
+                        events.selectClientItem(clientIdString);
+                    }
                     break;
                 }
                 default:

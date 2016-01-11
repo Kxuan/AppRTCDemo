@@ -47,6 +47,14 @@
            android:contentDescription="@string/disconnect_call"
            android:layout_width="48dp"
            android:layout_height="48dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/select_Client"
+            android:background="@drawable/abc_btn_rating_star_on_mtrl_alpha"
+            android:longClickable="true" />
+
     </LinearLayout>
 
     <TextView

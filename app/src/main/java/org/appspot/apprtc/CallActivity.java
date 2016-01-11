@@ -330,6 +330,12 @@ public class CallActivity extends Activity
         }
     }
 
+    //当点击切换客户端按钮
+    @Override
+    public void onSelectClient() {
+
+    }
+
     @Override
     public void onVideoScalingSwitch(ScalingType scalingType) {
         this.scalingType = scalingType;
@@ -615,10 +621,27 @@ public class CallActivity extends Activity
     public void onClientJoin(long peerId, String deviceType) {
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
 
+        appRtcClient.requestRoomInfo();
         //TODO 针对不同的设备类型做相应处理
         switch (deviceType) {
+            case "chrome": {
+                //    masterId=peerId;
+                //    peerConnectionClient.createPeerConnection(peerId, rootEglBase.getContext(),
+                //          localRender, remoteRender, signalingParameters, isHelperMode);
+                //   peerConnectionClient.createOffer();
 
+                break;
+            }
         }
+    }
+
+    //向确定对端发送连接请求
+    @Override
+    public void connect(long clientId) {
+        masterId = clientId;
+        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
+                localRender, remoteRender, signalingParameters, isHelperMode);
+        peerConnectionClient.createOffer();
     }
 
     @Override
@@ -632,16 +655,17 @@ public class CallActivity extends Activity
             names[i] = clients[i].toString();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(CallActivity.this);
-        builder.setTitle("请选择要连接的客户端");
+        builder.setTitle("选择客户端");
         builder.setItems(names,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        masterId = clients[which].getClientId();
-                       // Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
-                        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
-                                localRender, remoteRender, signalingParameters, isHelperMode);
-                        peerConnectionClient.createOffer();
+                        connect(clients[which].getClientId());
+//                        masterId = clients[which].getClientId();
+//                        // Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
+//                        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
+//                                localRender, remoteRender, signalingParameters, isHelperMode);
+//                        peerConnectionClient.createOffer();
                     }
                 });
 
@@ -708,10 +732,7 @@ public class CallActivity extends Activity
             public void run() {
                 if (appRtcClient != null) {
                     //本地sdp已就绪
-
                     appRtcClient.sendOfferSdp(masterId, sdp, isHelperMode);
-
-
                     logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
                 }
             }

@@ -113,8 +113,7 @@ public interface AppRTCClient {
 
         void onClientJoin(long peerId, String deviceType);
 
-        //显示客户端列表
-        void selectClientItem(ClientInfo[] clientIdString);
+
 
         /**
          * Callback fired once remote Ice candidate is received.
@@ -133,5 +132,10 @@ public interface AppRTCClient {
          * Callback fired once channel error happened.
          */
         public void onChannelError(final String description);
+
+        //显示客户端列表
+        void selectClientItem(ClientInfo[] clientIdString);
+        //直接连接
+        void connect(long masterId);
     }
 }
