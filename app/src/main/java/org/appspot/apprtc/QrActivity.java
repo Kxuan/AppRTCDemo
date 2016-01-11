@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 public class QrActivity extends Activity implements Callback {
     private long roomId = 0;
     private long masterId = 0;
-    //试验-
+
     private ListView roomListView;
     private SharedPreferences sharedPref;
     private String keyprefVideoCallEnabled;
@@ -57,7 +57,7 @@ public class QrActivity extends Activity implements Callback {
     private String keyprefDisplayHud;
     private String keyprefRoomServerUrl;
     private String keyprefRoom;
-    //-试验
+
     private CaptureActivityHandler handler;
     private ViewfinderView viewfinderView;
     private boolean hasSurface;
@@ -200,31 +200,64 @@ public class QrActivity extends Activity implements Callback {
             Drawable drawable = new BitmapDrawable(barcode);
             dialog.setIcon(drawable);
         }
+        String url = obj.toString();
 
-        String ur = obj.toString();
-        Pattern pattern = Pattern.compile("^(http.*?)\\/android\\/\\?room=(\\d+)\\&master=(\\d+)");
-        Matcher matcher = pattern.matcher(obj.toString());
+        Pattern patternHelpMode = Pattern.compile("^(http.*?)\\/android\\/\\?room=(\\d+)\\&master=(\\d+)");
+        Matcher matcherHelp = patternHelpMode.matcher(url);
 
-        if (matcher.matches()) {
+        Pattern patternNotHelp = Pattern.compile("^(http.*?)\\/r\\/(\\d+)");
+        Matcher matcherNotHelp = patternNotHelp.matcher(url);
+
+        //匹配到助手模式
+        if (matcherHelp.matches()) {
             try {
-                roomId = Long.parseLong(matcher.group(2));
-                masterId = Long.parseLong(matcher.group(3));
+                roomId = Long.parseLong(matcherHelp.group(2));
+                masterId = Long.parseLong(matcherHelp.group(3));
 
             } catch (NumberFormatException ex) {
                 return;
             }
+            //助手模式
+            if (roomId > 0 && masterId > 0) {
+                dialog.setTitle("房间信息");
+                dialog.setMessage("是否做为房间:" + roomId + "的辅助设备?");
+                dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        qrConnectRoom(roomId, masterId, true);
+                    }
+                });
+                dialog.setPositiveButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+            } else {
 
-
+                dialog.setTitle("房间错误");
+                dialog.setMessage("房间Id=" + roomId);
+                dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+            }
         }
-
-        //(/^(http.*?)\/android\/\?room =(\d+)\&master=(\d+)/)
-        if (roomId > 0) {
+        //匹配正常模式下
+        if (matcherNotHelp.matches()) {
+            try {
+                roomId = Long.parseLong(matcherNotHelp.group(2));
+            } catch (NumberFormatException ex) {
+                return;
+            }
             dialog.setTitle("房间信息");
-            dialog.setMessage("是否做为房间:" + roomId + "的辅助设备?");
+            dialog.setMessage("是否加入房间:" + roomId );
             dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    qrConnectRoom(roomId, masterId, true);
+                    qrConnectRoom(roomId, masterId, false);
                 }
             });
             dialog.setPositiveButton("取消", new DialogInterface.OnClickListener() {
@@ -233,17 +266,11 @@ public class QrActivity extends Activity implements Callback {
                     finish();
                 }
             });
-        } else {
-
-            dialog.setTitle("房间错误");
-            dialog.setMessage("房间Id="+roomId);
-            dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
         }
+
+
+        //(/^(http.*?)\/android\/\?room =(\d+)\&master=(\d+)/)
+
 
         dialog.create().show();
 
@@ -342,7 +369,10 @@ public class QrActivity extends Activity implements Callback {
         intent.setData(uri);
         intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
         intent.putExtra(CallActivity.EXTRA_HELPER_MODE, isHelperMode);
-        intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
+        if(isHelperMode)
+        {
+            intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
+        }
 
         intent.putExtra(CallActivity.EXTRA_VIDEO_CALL, videoCallEnabled);
         intent.putExtra(CallActivity.EXTRA_VIDEO_WIDTH, videoWidth);

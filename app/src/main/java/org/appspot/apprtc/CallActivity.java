@@ -648,7 +648,7 @@ public class CallActivity extends Activity
         builder.show();
     }
 
-    //远程挂断,本地断开连接，要判断是否
+    //远程挂断,本地断开连接，
     @Override
     public void onRemoteLeave(final long leaveID) {
         if (leaveID == masterId) {
