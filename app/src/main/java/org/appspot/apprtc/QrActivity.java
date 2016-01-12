@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 public class QrActivity extends Activity implements Callback {
     private long roomId = 0;
     private long masterId = 0;
+    private String qrUrl = null;
 
     private ListView roomListView;
     private SharedPreferences sharedPref;
@@ -211,6 +212,7 @@ public class QrActivity extends Activity implements Callback {
         //匹配到助手模式
         if (matcherHelp.matches()) {
             try {
+                qrUrl = matcherHelp.group(1);
                 roomId = Long.parseLong(matcherHelp.group(2));
                 masterId = Long.parseLong(matcherHelp.group(3));
 
@@ -248,12 +250,13 @@ public class QrActivity extends Activity implements Callback {
         //匹配正常模式下
         if (matcherNotHelp.matches()) {
             try {
+                qrUrl = matcherHelp.group(1);
                 roomId = Long.parseLong(matcherNotHelp.group(2));
             } catch (NumberFormatException ex) {
                 return;
             }
             dialog.setTitle("房间信息");
-            dialog.setMessage("是否加入房间:" + roomId );
+            dialog.setMessage("是否加入房间:" + roomId);
             dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -282,9 +285,10 @@ public class QrActivity extends Activity implements Callback {
 
         Intent intent = new Intent(this, CallActivity.class);
 
-        String roomUrl = sharedPref.getString(
-                keyprefRoomServerUrl,
-                getString(R.string.pref_room_server_url_default));
+//        String roomUrl = sharedPref.getString(
+//                keyprefRoomServerUrl,
+//                getString(R.string.pref_room_server_url_default));
+        String roomUrl=qrUrl;
         Uri uri = Uri.parse(roomUrl);
         System.out.println(uri);
         boolean videoCallEnabled = sharedPref.getBoolean(keyprefVideoCallEnabled, Boolean.valueOf("true"));
@@ -369,8 +373,7 @@ public class QrActivity extends Activity implements Callback {
         intent.setData(uri);
         intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
         intent.putExtra(CallActivity.EXTRA_HELPER_MODE, isHelperMode);
-        if(isHelperMode)
-        {
+        if (isHelperMode) {
             intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
         }
 

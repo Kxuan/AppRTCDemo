@@ -135,7 +135,8 @@ public interface AppRTCClient {
 
         //显示客户端列表
         void selectClientItem(ClientInfo[] clientIdString);
-        //直接连接
+
+
         void connect(long masterId);
     }
 }

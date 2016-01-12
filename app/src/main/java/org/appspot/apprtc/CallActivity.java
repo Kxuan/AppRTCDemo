@@ -333,7 +333,7 @@ public class CallActivity extends Activity
     //当点击切换客户端按钮
     @Override
     public void onSelectClient() {
-
+        appRtcClient.requestRoomInfo();
     }
 
     @Override
@@ -638,6 +638,21 @@ public class CallActivity extends Activity
     //向确定对端发送连接请求
     @Override
     public void connect(long clientId) {
+        if (masterId == clientId) {
+//            logAndToast("已经和选择客户端建立连接或者只有2个客户端");
+            return;
+        }
+
+        //断开已存在的连接
+        if (masterId > 0) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    logAndToast("将与选择客户端建立连接");
+                    disconnect();
+                }
+            });
+        }
         masterId = clientId;
         peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
                 localRender, remoteRender, signalingParameters, isHelperMode);
@@ -660,6 +675,7 @@ public class CallActivity extends Activity
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
                         connect(clients[which].getClientId());
 //                        masterId = clients[which].getClientId();
 //                        // Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
