@@ -285,10 +285,10 @@ public class WebSocketRTCClient implements AppRTCClient,
                 }
                 case "answer": {
                     long fromPeerId = json.getLong("from");
-                    jsonContent = json.getJSONObject("content");
                     //收到answer消息
                     // 如果对方接受则传递sdp，否则sdp参数传null
                     if (json.getBoolean("accept")) {
+                        jsonContent = json.getJSONObject("content");
                         SessionDescription sdp = new SessionDescription(
                                 SessionDescription.Type.ANSWER,
                                 jsonContent.getString("sdp"));
