@@ -138,5 +138,6 @@ public interface AppRTCClient {
 
 
         void connect(long masterId);
+        void updateClientList(long peerId, String deviceType);
     }
 }

@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
+import java.util.List;
+
 /**
  * Negotiates signaling for chatting with apprtc.appspot.com "rooms".
  * Uses the client<->server specifics of the apprtc AppEngine webapp.
@@ -40,6 +42,8 @@ public class WebSocketRTCClient implements AppRTCClient,
     private static final String ROOM_MESSAGE = "message";
     private static final String ROOM_LEAVE = "leave";
     private long localClientId;
+
+
 
     private enum ConnectionState {
         NEW, CONNECTED, CLOSED, ERROR
@@ -329,7 +333,8 @@ public class WebSocketRTCClient implements AppRTCClient,
                         return;
                     }
                     //拿到所有的客户id和设备类型,加载到选择列表供用户选择
-                    ClientInfo[] clientIdString = new ClientInfo[jsonArray.length() - 1];
+
+                    ClientInfo[]  clientIdString = new ClientInfo[jsonArray.length() - 1];
                     int j = 0;
                     long clientId = 0;
                     String device = null;
@@ -347,6 +352,7 @@ public class WebSocketRTCClient implements AppRTCClient,
                     //只有2个客户端，就直接建立连接
                     if (jsonArray.length() == 2) {
                         events.connect(clientIdString[0].getClientId());
+                        events.updateClientList(clientId,device);
                     } else {
                         events.selectClientItem(clientIdString);
                     }

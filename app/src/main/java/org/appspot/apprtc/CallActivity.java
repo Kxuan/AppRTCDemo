@@ -34,7 +34,6 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.json.JSONObject;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
@@ -42,9 +41,8 @@ import org.webrtc.StatsReport;
 import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.SurfaceViewRenderer;
 
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Activity for peer connection call setup, call waiting
@@ -139,6 +137,9 @@ public class CallActivity extends Activity
     private boolean isError;
     private boolean callControlFragmentVisible = true;
     private long callStartedTimeMs = 0;
+
+    //房间内存在的客户端信息
+    private List<ClientInfo> clientInfoList = new ArrayList<ClientInfo>();
 
     // Controls
     CallFragment callFragment;
@@ -331,11 +332,7 @@ public class CallActivity extends Activity
         }
     }
 
-    //当点击切换客户端按钮
-    @Override
-    public void onSelectClient() {
-        appRtcClient.requestRoomInfo();
-    }
+
 
     @Override
     public void onVideoScalingSwitch(ScalingType scalingType) {
@@ -617,19 +614,24 @@ public class CallActivity extends Activity
 
     }
 
+    public void updateClientList(long peerId, String deviceType) {
+        ClientInfo clientInfo = new ClientInfo(peerId, deviceType);
+        clientInfoList.add(clientInfo);
+    }
+
     @Override
     public void onClientJoin(long peerId, String deviceType) {
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
 
+        updateClientList(peerId, deviceType);
+//        if(clientInfoList.size()==2)
+//        {
+//            connect(peerId);
+//        }
 //        appRtcClient.requestRoomInfo();
         //TODO 针对不同的设备类型做相应处理
         switch (deviceType) {
             case "chrome": {
-                //    masterId=peerId;
-                //    peerConnectionClient.createPeerConnection(peerId, rootEglBase.getContext(),
-                //          localRender, remoteRender, signalingParameters, isHelperMode);
-                //   peerConnectionClient.createOffer();
-
                 break;
             }
         }
@@ -647,8 +649,7 @@ public class CallActivity extends Activity
         if (masterId > 0) {
             logAndToast("将与选择客户端建立连接");
             peerConnectionClient.reconnect(clientId);
-        }
-        else {
+        } else {
             peerConnectionClient.createPeerConnection(clientId, rootEglBase.getContext(),
                     localRender, remoteRender, signalingParameters, isHelperMode);
         }
@@ -658,16 +659,13 @@ public class CallActivity extends Activity
 
     }
 
-    @Override
-    public void selectClientItem(final ClientInfo[] clients) {
-        //是助手模式,return
-        if (isHelperMode) {
-            return;
-        }
+    public void showClientselecter(final ClientInfo[] clients) {
+
         String[] names = new String[clients.length];
         for (int i = 0; i < clients.length; i++) {
             names[i] = clients[i].toString();
         }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(CallActivity.this);
         builder.setTitle("选择客户端");
         builder.setItems(names,
@@ -683,6 +681,36 @@ public class CallActivity extends Activity
         builder.show();
     }
 
+
+    //只有手机客户端第一次进入才会执行，要更新已纯在的客户
+    @Override
+    public void selectClientItem(final ClientInfo[] clients) {
+        //是助手模式,return
+        if (isHelperMode) {
+            return;
+        }
+        for (int i = 0; i < clients.length; i++) {
+            //更新列表
+            updateClientList(clients[i].getClientId(), clients[i].getDevice());
+        }
+        showClientselecter(clients);
+    }
+
+    //当点击切换客户端按钮
+    @Override
+    public void onSelectClient() {
+//        if(clientInfoList.size()==1)
+//        {
+//            logAndToast("只有一个客户端可以连接");
+//            return;
+//        }
+        ClientInfo[] clients=new ClientInfo[clientInfoList.size()];
+        for (int i = 0; i < clientInfoList.size(); i++) {
+            clients[i]=clientInfoList.get(i);
+        }
+        showClientselecter(clients);
+    }
+
     //远程挂断,本地断开连接，
     @Override
     public void onRemoteLeave(final long leaveID) {
@@ -695,9 +723,15 @@ public class CallActivity extends Activity
                 }
             });
 
-        } else {
-            return;
         }
+        for (int i = 0; i < clientInfoList.size(); i++) {
+            if (clientInfoList.get(i).getClientId() == leaveID)//找到
+            {
+                break;
+            }
+            clientInfoList.remove(clientInfoList.get(i));//移除
+        }
+
     }
 
     @Override
