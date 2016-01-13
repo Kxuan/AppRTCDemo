@@ -328,31 +328,31 @@ public class WebSocketRTCClient implements AppRTCClient,
                 case "room": {
                     JSONArray jsonArray;
                     jsonArray = json.getJSONArray("clients");
+
+                    //房间只有自己，先return
                     if (jsonArray.length() == 1) {
-                        //房间只有自己，先return
                         return;
                     }
-                    //拿到所有的客户id和设备类型,加载到选择列表供用户选择
 
                     ClientInfo[]  clientIdString = new ClientInfo[jsonArray.length() - 1];
                     int j = 0;
                     long clientId = 0;
                     String device = null;
                     for (int i = 0; i < jsonArray.length(); i++) {
-//                        long clientId = 0;
-//                        String device = null;
                         JSONObject jsonClient = (JSONObject) jsonArray.get(i);
                         clientId = jsonClient.getLong("id");
                         device = jsonClient.getString("device");
-                        //显示的是本机设备,localClientId,本机设备的Id，client服务器返回的id
+
+                        //过滤本机设备,localClientId,本机设备的Id，client服务器返回的id
                         if (clientId != localClientId) {
                             clientIdString[j++] = new ClientInfo(clientId, device);
                         }
                     }
-                    //只有2个客户端，就直接建立连接
+
+                    //只有2个客户端（包括自己），就直接建立连接
                     if (jsonArray.length() == 2) {
                         events.connect(clientIdString[0].getClientId());
-                        events.updateClientList(clientId,device);
+                        events.updateClientList(clientIdString[0].getClientId(),clientIdString[0].getDevice());
                     } else {
                         events.selectClientItem(clientIdString);
                     }

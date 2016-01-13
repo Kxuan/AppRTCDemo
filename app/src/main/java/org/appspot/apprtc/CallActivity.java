@@ -624,11 +624,11 @@ public class CallActivity extends Activity
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
 
         updateClientList(peerId, deviceType);
-//        if(clientInfoList.size()==2)
-//        {
-//            connect(peerId);
-//        }
-//        appRtcClient.requestRoomInfo();
+        if(clientInfoList.size()==1)
+        {
+            connect(peerId);
+        }
+
         //TODO 针对不同的设备类型做相应处理
         switch (deviceType) {
             case "chrome": {
@@ -682,7 +682,7 @@ public class CallActivity extends Activity
     }
 
 
-    //只有手机客户端第一次进入才会执行，要更新已纯在的客户
+    //只有手机客户端第一次进入才会执行
     @Override
     public void selectClientItem(final ClientInfo[] clients) {
         //是助手模式,return
@@ -699,11 +699,11 @@ public class CallActivity extends Activity
     //当点击切换客户端按钮
     @Override
     public void onSelectClient() {
-//        if(clientInfoList.size()==1)
-//        {
-//            logAndToast("只有一个客户端可以连接");
-//            return;
-//        }
+        if(clientInfoList.size()==1)
+        {
+            logAndToast("只有一个客户端可以连接");
+            return;
+        }
         ClientInfo[] clients=new ClientInfo[clientInfoList.size()];
         for (int i = 0; i < clientInfoList.size(); i++) {
             clients[i]=clientInfoList.get(i);
