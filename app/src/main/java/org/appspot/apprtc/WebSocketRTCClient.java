@@ -310,8 +310,8 @@ public class WebSocketRTCClient implements AppRTCClient,
                 }
 
                 case "leave": {
-                    long leaveId=json.getLong("id");
-                    Log.d(TAG,"leaveId:"+leaveId);
+                    long leaveId = json.getLong("id");
+                    Log.d(TAG, "leaveId:" + leaveId);
                     events.onRemoteLeave(leaveId);
                     break;
 
@@ -345,11 +345,9 @@ public class WebSocketRTCClient implements AppRTCClient,
                         }
                     }
                     //只有2个客户端，就直接建立连接
-                    if(jsonArray.length() == 2)
-                    {
+                    if (jsonArray.length() == 2) {
                         events.connect(clientIdString[0].getClientId());
-                    }
-                    else {
+                    } else {
                         events.selectClientItem(clientIdString);
                     }
                     break;

@@ -93,6 +93,7 @@ public class PeerConnectionClient {
     private PeerConnection peerConnection;
     //对端客户ID
     private long peerId;
+    PeerConnection.RTCConfiguration rtcConfig;
 
 
     PeerConnectionFactory.Options options = null;
@@ -255,6 +256,26 @@ public class PeerConnectionClient {
         });
     }
 
+    public void reconnect(final long mastid) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (peerConnection != null) {
+                    peerConnection.removeStream(mediaStream);
+                    peerConnection.dispose();
+                    peerConnection = null;
+                }
+                localSdp = null;
+                peerId = mastid;
+                peerConnection = factory.createPeerConnection(
+                        rtcConfig, pcConstraints, pcObserver);
+                peerConnection.addStream(mediaStream);
+            }
+        });
+
+
+    }
+
     //新添加的一个isHelperMode参数,从CallActivity来的
     public void createPeerConnection(
             long peerId,
@@ -269,7 +290,7 @@ public class PeerConnectionClient {
             return;
         }
         //保存接收的ishelpermode参数
-        this.isHelperMode=isHelperMode;
+        this.isHelperMode = isHelperMode;
         //绑定对端ID
         this.peerId = peerId;
         this.localRender = localRender;
@@ -335,7 +356,8 @@ public class PeerConnectionClient {
         }
         Log.d(TAG, "Peer connection factory created.");
     }
-//sdpMediaConstraints
+
+    //sdpMediaConstraints
     private void createMediaConstraintsInternal() {
         // Create peer connection constraints.
         pcConstraints = new MediaConstraints();
@@ -408,18 +430,16 @@ public class PeerConnectionClient {
 
         sdpMediaConstraints = new MediaConstraints();
         //如果是助手模式,设为false,不等待远端消息
-        if(isHelperMode)
-        {
+        if (isHelperMode) {
             sdpMediaConstraints.mandatory.add(new KeyValuePair(
-                "OfferToReceiveAudio", "false"));
-        }
-        else//否则设为true,等待远端消息
+                    "OfferToReceiveAudio", "false"));
+        } else//否则设为true,等待远端消息
         {
             sdpMediaConstraints.mandatory.add(new KeyValuePair(
                     "OfferToReceiveAudio", "true"));
         }
 
-        if (videoCallEnabled &&!isHelperMode) {
+        if (videoCallEnabled && !isHelperMode) {
             sdpMediaConstraints.mandatory.add(new KeyValuePair(
                     "OfferToReceiveVideo", "true"));
         } else {
@@ -446,7 +466,7 @@ public class PeerConnectionClient {
             factory.setVideoHwAccelerationOptions(renderEGLContext);
         }
 
-        PeerConnection.RTCConfiguration rtcConfig =
+        rtcConfig =
                 new PeerConnection.RTCConfiguration(signalingParameters.iceServers);
         // TCP candidates are only useful when connecting to a server that supports
         // ICE-TCP.
@@ -594,7 +614,7 @@ public class PeerConnectionClient {
     }
 
 
-    public void createOffer( ) {
+    public void createOffer() {
 
         executor.execute(new Runnable() {
             @Override

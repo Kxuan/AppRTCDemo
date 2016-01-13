@@ -2,6 +2,7 @@ package org.appspot.apprtc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ApplicationErrorReport;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -248,9 +249,9 @@ public class QrActivity extends Activity implements Callback {
             }
         }
         //匹配正常模式下
-        if (matcherNotHelp.matches()) {
+        else if (matcherNotHelp.matches()) {
             try {
-                qrUrl = matcherHelp.group(1);
+                qrUrl = matcherNotHelp.group(1);
                 roomId = Long.parseLong(matcherNotHelp.group(2));
             } catch (NumberFormatException ex) {
                 return;
@@ -269,6 +270,10 @@ public class QrActivity extends Activity implements Callback {
                     finish();
                 }
             });
+        }
+        else {
+            //扫描出错
+            return;
         }
 
 

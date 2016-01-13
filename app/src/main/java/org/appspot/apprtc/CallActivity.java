@@ -325,7 +325,8 @@ public class CallActivity extends Activity
 
     @Override
     public void onCameraSwitch() {
-        if (peerConnectionClient != null) {
+//        if (peerConnectionClient != null)
+        {
             peerConnectionClient.switchCamera();
         }
     }
@@ -594,7 +595,6 @@ public class CallActivity extends Activity
     @Override
     public void onRemoteAnswer(long peerId, final SessionDescription sdp) {
         final long delta = System.currentTimeMillis() - callStartedTimeMs;
-
         //如果应答answer的对端与masterId不符
         // 则忽略这条answer
         if (peerId != masterId) {
@@ -621,7 +621,7 @@ public class CallActivity extends Activity
     public void onClientJoin(long peerId, String deviceType) {
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
 
-        appRtcClient.requestRoomInfo();
+//        appRtcClient.requestRoomInfo();
         //TODO 针对不同的设备类型做相应处理
         switch (deviceType) {
             case "chrome": {
@@ -639,24 +639,23 @@ public class CallActivity extends Activity
     @Override
     public void connect(long clientId) {
         if (masterId == clientId) {
-//            logAndToast("已经和选择客户端建立连接或者只有2个客户端");
+            logAndToast("已经和选择客户端建立连接或者只有2个客户端");
             return;
         }
 
         //断开已存在的连接
         if (masterId > 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    logAndToast("将与选择客户端建立连接");
-                    disconnect();
-                }
-            });
+            logAndToast("将与选择客户端建立连接");
+            peerConnectionClient.reconnect(clientId);
+        }
+        else {
+            peerConnectionClient.createPeerConnection(clientId, rootEglBase.getContext(),
+                    localRender, remoteRender, signalingParameters, isHelperMode);
         }
         masterId = clientId;
-        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
-                localRender, remoteRender, signalingParameters, isHelperMode);
         peerConnectionClient.createOffer();
+
+
     }
 
     @Override
@@ -677,11 +676,7 @@ public class CallActivity extends Activity
                     public void onClick(DialogInterface dialog, int which) {
 
                         connect(clients[which].getClientId());
-//                        masterId = clients[which].getClientId();
-//                        // Toast.makeText(CallActivity.this, "选择的客户端为：" + masterId, Toast.LENGTH_SHORT).show();
-//                        peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
-//                                localRender, remoteRender, signalingParameters, isHelperMode);
-//                        peerConnectionClient.createOffer();
+
                     }
                 });
 

@@ -64,7 +64,7 @@ public class CallFragment extends Fragment {
         (ImageButton) controlView.findViewById(R.id.button_call_switch_camera);
     videoScalingButton =
         (ImageButton) controlView.findViewById(R.id.button_call_scaling_mode);
-    //切换客户端按钮
+   // 切换客户端按钮
     selectClientButton =
             (ImageButton) controlView.findViewById(R.id.select_Client);
     captureFormatText =
