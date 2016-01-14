@@ -348,7 +348,6 @@ public class WebSocketRTCClient implements AppRTCClient,
                             clientIdString[j++] = new ClientInfo(clientId, device);
                         }
                     }
-
                     //只有2个客户端（包括自己），就直接建立连接
                     if (jsonArray.length() == 2) {
                         events.connect(clientIdString[0].getClientId());

@@ -659,7 +659,7 @@ public class CallActivity extends Activity
 
     }
 
-    public void showClientselecter(final ClientInfo[] clients) {
+    public void showClientSelecter(final ClientInfo[] clients) {
 
         String[] names = new String[clients.length];
         for (int i = 0; i < clients.length; i++) {
@@ -693,12 +693,17 @@ public class CallActivity extends Activity
             //更新列表
             updateClientList(clients[i].getClientId(), clients[i].getDevice());
         }
-        showClientselecter(clients);
+        showClientSelecter(clients);
     }
 
     //当点击切换客户端按钮
     @Override
     public void onSelectClient() {
+        if(isHelperMode)
+        {
+            logAndToast("助手模式不允许切换客户端");
+            return;
+        }
         if(clientInfoList.size()==1)
         {
             logAndToast("只有一个客户端可以连接");
@@ -708,7 +713,7 @@ public class CallActivity extends Activity
         for (int i = 0; i < clientInfoList.size(); i++) {
             clients[i]=clientInfoList.get(i);
         }
-        showClientselecter(clients);
+        showClientSelecter(clients);
     }
 
     //远程挂断,本地断开连接，

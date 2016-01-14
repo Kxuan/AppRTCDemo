@@ -270,19 +270,11 @@ public class QrActivity extends Activity implements Callback {
                     finish();
                 }
             });
-        }
-        else {
+        } else {
             //扫描出错
             return;
         }
-
-
-        //(/^(http.*?)\/android\/\?room =(\d+)\&master=(\d+)/)
-
-
         dialog.create().show();
-
-
     }
 
     //拿到roomid masterid 各种配置,开始连接
@@ -293,7 +285,7 @@ public class QrActivity extends Activity implements Callback {
 //        String roomUrl = sharedPref.getString(
 //                keyprefRoomServerUrl,
 //                getString(R.string.pref_room_server_url_default));
-        String roomUrl=qrUrl;
+        String roomUrl = qrUrl;
         Uri uri = Uri.parse(roomUrl);
         System.out.println(uri);
         boolean videoCallEnabled = sharedPref.getBoolean(keyprefVideoCallEnabled, Boolean.valueOf("true"));
