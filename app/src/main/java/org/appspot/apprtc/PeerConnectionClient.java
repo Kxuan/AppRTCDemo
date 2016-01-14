@@ -511,6 +511,10 @@ public class PeerConnectionClient {
         Log.d(TAG, "Peer connection created.");
     }
 
+    public boolean isConnected() {
+        return peerConnection != null;
+    }
+
     private void closeInternal() {
         Log.d(TAG, "Closing peer connection.");
         statsTimer.cancel();
@@ -1075,7 +1079,7 @@ public class PeerConnectionClient {
 
         @Override
         public void onSetFailure(final String error) {
-            reportError("setSDP error: " + error);
+            reportError("setSDP error2: " + error);
         }
     }
 }

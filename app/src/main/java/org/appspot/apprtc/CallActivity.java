@@ -333,7 +333,6 @@ public class CallActivity extends Activity
     }
 
 
-
     @Override
     public void onVideoScalingSwitch(ScalingType scalingType) {
         this.scalingType = scalingType;
@@ -581,10 +580,20 @@ public class CallActivity extends Activity
 
     @Override
     public void onRemoteOffer(long peerId, SessionDescription sdp) {
-        //null为拒绝
-        if (sdp != null) {
-            appRtcClient.sendAnswerSdp(peerId, sdp);
+
+        //如果没有连接
+        if (!peerConnectionClient.isConnected()) {
+            peerConnectionClient.createPeerConnection(peerId, rootEglBase.getContext(),
+                    localRender, remoteRender, signalingParameters, isHelperMode);
+            peerConnectionClient.setRemoteDescription(sdp);
+            // Create answer. Answer SDP will be sent to offering client in
+            // PeerConnectionEvents.onLocalDescription event.
+            masterId=peerId;
+            peerConnectionClient.createAnswer();
+
+
         } else {
+            appRtcClient.sendAnswerSdp(peerId, null);
             Log.e(TAG, "拒绝来自" + Long.toString(peerId) + "的邀请");
         }
     }
@@ -607,11 +616,9 @@ public class CallActivity extends Activity
             return;
         }
 
-//发起连接
+        //发起连接
         logAndToast("Received remote " + sdp.type + ", delay=" + delta + "ms");
         peerConnectionClient.setRemoteDescription(sdp);
-
-
     }
 
     public void updateClientList(long peerId, String deviceType) {
@@ -622,16 +629,20 @@ public class CallActivity extends Activity
     @Override
     public void onClientJoin(long peerId, String deviceType) {
         logAndToast(String.format("%d(%s)进入房间", peerId, deviceType));
-
-        updateClientList(peerId, deviceType);
-        if(clientInfoList.size()==1)
-        {
-            connect(peerId);
+        if (isHelperMode) {
+            return;
         }
 
+        updateClientList(peerId, deviceType);
+//        if (clientInfoList.size() == 1) {
+////            connect(peerId);
+//        }
         //TODO 针对不同的设备类型做相应处理
         switch (deviceType) {
             case "chrome": {
+                if (clientInfoList.size() == 1) {
+                    connect(peerId);
+                }
                 break;
             }
         }
@@ -650,6 +661,7 @@ public class CallActivity extends Activity
             logAndToast("将与选择客户端建立连接");
             peerConnectionClient.reconnect(clientId);
         } else {
+            logAndToast("zhengzai建立连接" + clientId);
             peerConnectionClient.createPeerConnection(clientId, rootEglBase.getContext(),
                     localRender, remoteRender, signalingParameters, isHelperMode);
         }
@@ -659,7 +671,7 @@ public class CallActivity extends Activity
 
     }
 
-    public void showClientSelecter(final ClientInfo[] clients) {
+    public void showClientSelector(final ClientInfo[] clients) {
 
         String[] names = new String[clients.length];
         for (int i = 0; i < clients.length; i++) {
@@ -693,27 +705,25 @@ public class CallActivity extends Activity
             //更新列表
             updateClientList(clients[i].getClientId(), clients[i].getDevice());
         }
-        showClientSelecter(clients);
+        showClientSelector(clients);
     }
 
     //当点击切换客户端按钮
     @Override
     public void onSelectClient() {
-        if(isHelperMode)
-        {
+        if (isHelperMode) {
             logAndToast("助手模式不允许切换客户端");
             return;
         }
-        if(clientInfoList.size()==1)
-        {
+        if (clientInfoList.size() == 1) {
             logAndToast("只有一个客户端可以连接");
             return;
         }
-        ClientInfo[] clients=new ClientInfo[clientInfoList.size()];
+        ClientInfo[] clients = new ClientInfo[clientInfoList.size()];
         for (int i = 0; i < clientInfoList.size(); i++) {
-            clients[i]=clientInfoList.get(i);
+            clients[i] = clientInfoList.get(i);
         }
-        showClientSelecter(clients);
+        showClientSelector(clients);
     }
 
     //远程挂断,本地断开连接，
@@ -781,9 +791,20 @@ public class CallActivity extends Activity
             @Override
             public void run() {
                 if (appRtcClient != null) {
-                    //本地sdp已就绪
-                    appRtcClient.sendOfferSdp(masterId, sdp, isHelperMode);
-                    logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
+                    switch (sdp.type) {
+                        case OFFER:
+                            appRtcClient.sendOfferSdp(masterId, sdp, isHelperMode);
+                            logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
+                            break;
+                        case ANSWER:
+                            appRtcClient.sendAnswerSdp(masterId, sdp);
+                            logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
+                            break;
+                        default:
+                            throw new RuntimeException("不支持的SDP类型" + sdp.type.toString());
+
+                    }
+
                 }
             }
         });

@@ -330,7 +330,7 @@ public class WebSocketRTCClient implements AppRTCClient,
                     jsonArray = json.getJSONArray("clients");
 
                     //房间只有自己，先return
-                    if (jsonArray.length() == 1) {
+                    if (jsonArray.length() <= 1) {
                         return;
                     }
 
