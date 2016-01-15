@@ -23,7 +23,8 @@
            android:layout_marginBottom="32dp"
            android:layout_centerHorizontal="true"
            android:layout_width="wrap_content"
-           android:layout_height="wrap_content">
+           android:layout_height="wrap_content"
+        android:weightSum="1">
 
        <ImageButton
            android:id="@+id/button_call_disconnect"
@@ -49,11 +50,11 @@
            android:layout_height="48dp"/>
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:id="@+id/select_Client"
-            android:background="@drawable/abc_btn_rating_star_on_mtrl_alpha"
-            android:longClickable="true" />
+            android:background="@drawable/select_client"/>
+
 
     </LinearLayout>
 

@@ -55,7 +55,7 @@
 
         <activity android:name=".QrActivity"
             android:label="@string/settings_name"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden"></activity>

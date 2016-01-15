@@ -75,6 +75,8 @@ final class CameraConfigurationManager {
     setZoom(parameters);
     //setSharpness(parameters);
     camera.setParameters(parameters);
+    camera.setDisplayOrientation(90);
+
   }
 
   Point getCameraResolution() {

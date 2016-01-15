@@ -76,7 +76,6 @@ public class QrActivity extends Activity implements Callback {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //试验-
         // Get setting keys.
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -96,7 +95,6 @@ public class QrActivity extends Activity implements Callback {
         keyprefDisplayHud = getString(R.string.pref_displayhud_key);
         keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
         keyprefRoom = getString(R.string.pref_room_key);
-        //-试验
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_qr);
         // 初始化 CameraManager
