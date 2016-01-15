@@ -256,23 +256,36 @@ public class QrActivity extends Activity implements Callback {
             } catch (NumberFormatException ex) {
                 return;
             }
-            dialog.setTitle("房间信息");
-            dialog.setMessage("是否加入房间:" + roomId);
-            dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    qrConnectRoom(roomId, masterId, false);
-                }
-            });
-            dialog.setPositiveButton("取消", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
+            if (roomId > 0) {
+                dialog.setTitle("房间信息");
+                dialog.setMessage("是否加入房间:" + roomId);
+                dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        qrConnectRoom(roomId, masterId, false);
+                    }
+                });
+                dialog.setPositiveButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+            } else {
+                //扫描出错
+                dialog.setTitle("房间错误");
+                dialog.setMessage("房间Id=" + roomId);
+                dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+            }
+
         } else {
-            //扫描出错
-            return;
+            dialog.setTitle("二维码或房间地址不正确");
+            dialog.setMessage("url:" + url);
         }
         dialog.create().show();
     }
