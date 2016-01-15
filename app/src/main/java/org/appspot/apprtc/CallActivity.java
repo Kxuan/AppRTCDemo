@@ -326,8 +326,7 @@ public class CallActivity extends Activity
 
     @Override
     public void onCameraSwitch() {
-//        if (peerConnectionClient != null)
-        {
+        if (peerConnectionClient != null) {
             peerConnectionClient.switchCamera();
         }
     }
@@ -588,7 +587,7 @@ public class CallActivity extends Activity
             peerConnectionClient.setRemoteDescription(sdp);
             // Create answer. Answer SDP will be sent to offering client in
             // PeerConnectionEvents.onLocalDescription event.
-            masterId=peerId;
+            masterId = peerId;
             peerConnectionClient.createAnswer();
 
 
@@ -713,6 +712,10 @@ public class CallActivity extends Activity
     public void onSelectClient() {
         if (isHelperMode) {
             logAndToast("助手模式不允许切换客户端");
+            return;
+        }
+        if (clientInfoList.size() < 1) {
+            logAndToast("目前没有客户端,请稍后再试");
             return;
         }
         if (clientInfoList.size() == 1) {

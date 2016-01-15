@@ -286,6 +286,12 @@ public class QrActivity extends Activity implements Callback {
         } else {
             dialog.setTitle("二维码或房间地址不正确");
             dialog.setMessage("url:" + url);
+            dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
         }
         dialog.create().show();
     }
