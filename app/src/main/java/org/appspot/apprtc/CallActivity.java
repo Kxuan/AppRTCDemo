@@ -132,6 +132,7 @@ public class CallActivity extends Activity
     private PeerConnectionParameters peerConnectionParameters;
     private boolean isHelperMode = true;
     private long masterId = 0;
+    private long qrPeer = 0;
 
     private boolean iceConnected;
     private boolean isError;
@@ -239,6 +240,9 @@ public class CallActivity extends Activity
                 finish();
                 return;
             }
+        } else {
+            //扫码传来的peerid
+            qrPeer = intent.getLongExtra(EXTRA_MASTER_ID, -1);
         }
 
         peerConnectionParameters = new PeerConnectionParameters(
@@ -668,10 +672,16 @@ public class CallActivity extends Activity
         peerConnectionClient.createOffer();
 
 
+
     }
 
     public void showClientSelector(final ClientInfo[] clients) {
-
+        //扫码得到确定连接的对端，就不再加载选择列表
+        if (qrPeer > 0) {
+            connect(qrPeer);
+            qrPeer=0;
+            return;
+        }
         String[] names = new String[clients.length];
         for (int i = 0; i < clients.length; i++) {
             names[i] = clients[i].toString();

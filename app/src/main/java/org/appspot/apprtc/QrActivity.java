@@ -2,7 +2,6 @@ package org.appspot.apprtc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ApplicationErrorReport;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,7 +17,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
@@ -40,6 +38,7 @@ public class QrActivity extends Activity implements Callback {
     private long roomId = 0;
     private long masterId = 0;
     private String qrUrl = null;
+    private long peer = 0;
 
     private ListView roomListView;
     private SharedPreferences sharedPref;
@@ -205,7 +204,7 @@ public class QrActivity extends Activity implements Callback {
         Pattern patternHelpMode = Pattern.compile("^(http.*?)\\/android\\/\\?room=(\\d+)\\&master=(\\d+)");
         Matcher matcherHelp = patternHelpMode.matcher(url);
 
-        Pattern patternNotHelp = Pattern.compile("^(http.*?)\\/r\\/(\\d+)");
+        Pattern patternNotHelp = Pattern.compile("^(http.*?)\\/android\\/\\?room=(\\d+)\\&peer=(\\d+)");
         Matcher matcherNotHelp = patternNotHelp.matcher(url);
 
         //匹配到助手模式
@@ -251,16 +250,17 @@ public class QrActivity extends Activity implements Callback {
             try {
                 qrUrl = matcherNotHelp.group(1);
                 roomId = Long.parseLong(matcherNotHelp.group(2));
+                peer = Long.parseLong(matcherNotHelp.group(3));
             } catch (NumberFormatException ex) {
                 return;
             }
-            if (roomId > 0) {
+            if (roomId > 0 && peer > 0) {
                 dialog.setTitle("房间信息");
-                dialog.setMessage("是否加入房间:" + roomId);
+                dialog.setMessage("是否与" + peer + "(room:" + roomId + ")" + "建立连接");
                 dialog.setNegativeButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        qrConnectRoom(roomId, masterId, false);
+                        qrConnectRoom(roomId, peer, false);
                     }
                 });
                 dialog.setPositiveButton("取消", new DialogInterface.OnClickListener() {
@@ -387,10 +387,9 @@ public class QrActivity extends Activity implements Callback {
         intent.setData(uri);
         intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
         intent.putExtra(CallActivity.EXTRA_HELPER_MODE, isHelperMode);
-        if (isHelperMode) {
-            intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
-        }
 
+
+        intent.putExtra(CallActivity.EXTRA_MASTER_ID, masterId);
         intent.putExtra(CallActivity.EXTRA_VIDEO_CALL, videoCallEnabled);
         intent.putExtra(CallActivity.EXTRA_VIDEO_WIDTH, videoWidth);
         intent.putExtra(CallActivity.EXTRA_VIDEO_HEIGHT, videoHeight);
