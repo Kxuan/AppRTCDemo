@@ -65,7 +65,7 @@
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/capture_format_slider_call"
         android:textSize="16sp"
-        android:text="Slide to change capture format"/>
+        android:text="滑动改变画质"/>
 
     <SeekBar
         android:id="@+id/capture_format_slider_call"

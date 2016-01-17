@@ -235,7 +235,7 @@ public class CallActivity extends Activity
         if (isHelperMode) {
             masterId = intent.getLongExtra(EXTRA_MASTER_ID, -1);
             if (masterId <= 0) {
-                logAndToast("Wrong master id!");
+                logAndToast("mastId错误!");
                 setResult(RESULT_CANCELED);
                 finish();
                 return;
@@ -399,27 +399,6 @@ public class CallActivity extends Activity
         localRender.requestLayout();
         remoteRender.requestLayout();
 
-        /*/原来的代码,备用
-        remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
-        remoteRender.setScalingType(scalingType);
-        remoteRender.setMirror(false);
-
-        if (iceConnected) {
-            localRenderLayout.setPosition(
-                    LOCAL_X_CONNECTED, LOCAL_Y_CONNECTED, LOCAL_WIDTH_CONNECTED, LOCAL_HEIGHT_CONNECTED);
-            localRender.setScalingType(ScalingType.SCALE_ASPECT_FIT);
-        } else {
-            localRenderLayout.setPosition(
-                    LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
-            localRender.setScalingType(scalingType);
-        }
-        localRender.setMirror(true);
-
-        localRender.requestLayout();
-        remoteRender.requestLayout();
-              */
-
-
     }
 
     private void startCall() {
@@ -562,7 +541,7 @@ public class CallActivity extends Activity
             peerConnectionClient.createPeerConnection(masterId, rootEglBase.getContext(),
                     localRender, remoteRender, signalingParameters, isHelperMode);
             peerConnectionClient.createOffer();
-            logAndToast("Creating peer connection, delay=" + delta + "ms");
+            logAndToast("正在创建对端连接,延迟=" + delta + "ms");
         } else {
             //普通模式
             //请求房间信息,都有哪些用户在
@@ -620,7 +599,7 @@ public class CallActivity extends Activity
         }
 
         //发起连接
-        logAndToast("Received remote " + sdp.type + ", delay=" + delta + "ms");
+        logAndToast("接收到远程" + sdp.type + ", 延迟=" + delta + "ms");
         peerConnectionClient.setRemoteDescription(sdp);
     }
 
@@ -654,17 +633,17 @@ public class CallActivity extends Activity
     //向确定对端发送连接请求
     @Override
     public void connect(long clientId) {
+
         if (masterId == clientId) {
             logAndToast("已经和选择客户端建立连接或者只有2个客户端");
             return;
         }
-
         //断开已存在的连接
         if (masterId > 0) {
             logAndToast("将与选择客户端建立连接");
             peerConnectionClient.reconnect(clientId);
         } else {
-            logAndToast("zhengzai建立连接" + clientId);
+            logAndToast("正在连接：" + clientId);
             peerConnectionClient.createPeerConnection(clientId, rootEglBase.getContext(),
                     localRender, remoteRender, signalingParameters, isHelperMode);
         }
@@ -743,14 +722,17 @@ public class CallActivity extends Activity
     @Override
     public void onRemoteLeave(final long leaveID) {
         if (leaveID == masterId) {
+            logAndToast("对方挂断:"+masterId);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    logAndToast("Remote leave:" + leaveID);
                     disconnect();
                 }
             });
 
+        }
+        else {
+            logAndToast("客户端离开:" + leaveID);
         }
         for (int i = 0; i < clientInfoList.size(); i++) {
             if (clientInfoList.get(i).getClientId() == leaveID)//找到
@@ -807,11 +789,11 @@ public class CallActivity extends Activity
                     switch (sdp.type) {
                         case OFFER:
                             appRtcClient.sendOfferSdp(masterId, sdp, isHelperMode);
-                            logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
+                            logAndToast("发送" + sdp.type + ", 延迟=" + delta + "ms");
                             break;
                         case ANSWER:
                             appRtcClient.sendAnswerSdp(masterId, sdp);
-                            logAndToast("Sending " + sdp.type + ", delay=" + delta + "ms");
+                            logAndToast("发送" + sdp.type + ", 延迟=" + delta + "ms");
                             break;
                         default:
                             throw new RuntimeException("不支持的SDP类型" + sdp.type.toString());
@@ -842,7 +824,7 @@ public class CallActivity extends Activity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                logAndToast("ICE connected, delay=" + delta + "ms");
+                logAndToast("连接已建立, 延迟=" + delta + "ms");
                 iceConnected = true;
                 callConnected();
             }
@@ -854,7 +836,7 @@ public class CallActivity extends Activity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                logAndToast("ICE disconnected");
+                logAndToast("连接断开");
                 iceConnected = false;
                 disconnect();
             }

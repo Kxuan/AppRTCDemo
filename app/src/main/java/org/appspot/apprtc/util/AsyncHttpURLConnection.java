@@ -108,9 +108,9 @@ public class AsyncHttpURLConnection {
       connection.disconnect();
       events.onHttpComplete(response);
     } catch (SocketTimeoutException e) {
-      events.onHttpError("HTTP " + method + " to " + url + " timeout");
+      events.onHttpError("HTTP " + method + " to " + url + " 超时");
     } catch (IOException e) {
-      events.onHttpError("HTTP " + method + " to " + url + " error: "
+      events.onHttpError("HTTP " + method + " to " + url + " 错误: "
           + e.getMessage());
     }
   }
