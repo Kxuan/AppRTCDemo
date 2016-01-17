@@ -11,7 +11,7 @@
     </string>
     <string name="channel_error_title">连接错误</string>
     <string name="connecting_to">正在连接: %1$s</string>
-    <string name="missing_url">错误:没有房间地址.</string>
+    <string name="missing_url">错误:没有房间地址</string>
     <string name="ok">OK</string>
     <string name="switch_camera">Switch front/back camera</string>
     <string name="toggle_debug">Toggle debug view</string>
@@ -28,18 +28,18 @@
     <string name="pref_videosettings_title">视频设置</string>
 
     <string name="pref_videocall_key">videocall_preference</string>
-    <string name="pref_videocall_title">视频通话.</string>
+    <string name="pref_videocall_title">视频通话</string>
     <string name="pref_videocall_dlg">Enable video in a call.</string>
     <string name="pref_videocall_default">true</string>
 
     <string name="pref_resolution_key">resolution_preference</string>
-    <string name="pref_resolution_title">视频分辨率.</string>
+    <string name="pref_resolution_title">视频分辨率</string>
     <string name="pref_resolution_dlg">选择本地视频分辨率</string>
     <string name="pref_resolution_default">Default</string>
 
     <string name="pref_fps_key">fps_preference</string>
-    <string name="pref_fps_title">相机fps设置.</string>
-    <string name="pref_fps_dlg">请选择本地fps.</string>
+    <string name="pref_fps_title">相机fps设置</string>
+    <string name="pref_fps_dlg">请选择本地fps</string>
     <string name="pref_fps_default">default</string>
 
     <string name="pref_capturequalityslider_key">capturequalityslider_preference</string>
@@ -71,7 +71,7 @@
     <string name="pref_value_disabled">关闭</string>
 
     <string name="pref_audiosettings_key">audio_settings_key</string>
-    <string name="pref_audiosettings_title">音频设置.</string>
+    <string name="pref_audiosettings_title">音频设置</string>
 
     <string name="pref_startaudiobitrate_key">startaudiobitrate_preference</string>
     <string name="pref_startaudiobitrate_title">音频编码</string>
@@ -84,7 +84,7 @@
     <string name="pref_startaudiobitratevalue_default">32</string>
 
     <string name="pref_audiocodec_key">audiocodec_preference</string>
-    <string name="pref_audiocodec_title">音频解码器.</string>
+    <string name="pref_audiocodec_title">音频解码器</string>
     <string name="pref_audiocodec_dlg">选择默认音频解码器</string>
     <string name="pref_audiocodec_default">OPUS</string>
 
@@ -97,13 +97,13 @@
     <string name="pref_miscsettings_title">其他设置</string>
 
     <string name="pref_cpu_usage_detection_key">cpu_usage_detection</string>
-    <string name="pref_cpu_usage_detection_title">CPU 超频检测.</string>
-    <string name="pref_cpu_usage_detection_dlg">Adapt transmission to CPU status.</string>
+    <string name="pref_cpu_usage_detection_title">CPU超频检测</string>
+    <string name="pref_cpu_usage_detection_dlg">Adapt transmission to CPU status</string>
     <string name="pref_cpu_usage_detection_default" translatable="false">true</string>
 
     <string name="pref_room_server_url_key">room_server_url_preference</string>
-    <string name="pref_room_server_url_title">房间服务器地址.</string>
-    <string name="pref_room_server_url_dlg">输入房间服务器地址.</string>
+    <string name="pref_room_server_url_title">房间服务器地址</string>
+    <string name="pref_room_server_url_dlg">输入房间服务器地址</string>
     <string name="pref_room_server_url_default" translatable="false">https://xia.apprtc.win:3000</string>
 
     <string name="pref_displayhud_key">displayhud_preference</string>
