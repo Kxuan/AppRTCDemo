@@ -102,9 +102,9 @@
     <string name="pref_cpu_usage_detection_default" translatable="false">true</string>
 
     <string name="pref_room_server_url_key">room_server_url_preference</string>
-    <string name="pref_room_server_url_title">房间服务器地址</string>
-    <string name="pref_room_server_url_dlg">输入房间服务器地址</string>
-    <string name="pref_room_server_url_default" translatable="false">https://xia.apprtc.win:3000</string>
+    <string name="pref_room_server_url_title">中心服务器地址</string>
+    <string name="pref_room_server_url_dlg">输入中心服务器地址</string>
+    <string name="pref_room_server_url_default" translatable="false">https://apprtc.win</string>
 
     <string name="pref_displayhud_key">displayhud_preference</string>
     <string name="pref_displayhud_title">通话统计</string>

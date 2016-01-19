@@ -15,8 +15,8 @@ android {
         minSdkVersion 14
         targetSdkVersion 19
 
-        versionCode 19
-        versionName "1.17.1"
+        versionCode 20
+        versionName "final"
 
         testApplicationId "org.appspot.apprtc.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
