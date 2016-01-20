@@ -58,7 +58,7 @@ public class SettingsActivity extends Activity
     keyprefNoAudioProcessing = getString(R.string.pref_noaudioprocessing_key);
 
     keyprefCpuUsageDetection = getString(R.string.pref_cpu_usage_detection_key);
-    keyPrefRoomServerUrl = getString(R.string.pref_room_server_url_key);
+//    keyPrefRoomServerUrl = getString(R.string.pref_room_server_url_key);
     keyPrefDisplayHud = getString(R.string.pref_displayhud_key);
 
     // Display the fragment as the main content.

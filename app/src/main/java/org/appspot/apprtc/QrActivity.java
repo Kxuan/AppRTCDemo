@@ -92,7 +92,7 @@ public class QrActivity extends Activity implements Callback {
         keyprefNoAudioProcessingPipeline = getString(R.string.pref_noaudioprocessing_key);
         keyprefCpuUsageDetection = getString(R.string.pref_cpu_usage_detection_key);
         keyprefDisplayHud = getString(R.string.pref_displayhud_key);
-        keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
+//        keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
         keyprefRoom = getString(R.string.pref_room_key);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_qr);

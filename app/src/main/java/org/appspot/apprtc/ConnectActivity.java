@@ -19,25 +19,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.webkit.URLUtil;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.util.ArrayList;
 
 /**
  * Handles the initial setup where the user selects which room to join.
@@ -53,6 +42,7 @@ public class ConnectActivity extends Activity {
     private ImageButton connectButton;
     private EditText roomEditText;
     private EditText masterEditText;
+    private EditText serverUrlEditText;
 
     private SharedPreferences sharedPref;
     private String keyprefVideoCallEnabled;
@@ -69,7 +59,7 @@ public class ConnectActivity extends Activity {
     private String keyprefNoAudioProcessingPipeline;
     private String keyprefCpuUsageDetection;
     private String keyprefDisplayHud;
-    private String keyprefRoomServerUrl;
+    private String keyprefServerUrl;
     private String keyprefRoom;
 
     @Override
@@ -93,11 +83,12 @@ public class ConnectActivity extends Activity {
         keyprefNoAudioProcessingPipeline = getString(R.string.pref_noaudioprocessing_key);
         keyprefCpuUsageDetection = getString(R.string.pref_cpu_usage_detection_key);
         keyprefDisplayHud = getString(R.string.pref_displayhud_key);
-        keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
+//        keyprefRoomServerUrl = getString(R.string.pref_room_server_url_key);
         keyprefRoom = getString(R.string.pref_room_key);
 
         this.setContentView(R.layout.activity_connect);
 
+        serverUrlEditText=(EditText)findViewById(R.id.serverUrl_edittext);
         masterEditText = (EditText) findViewById(R.id.client_edittext);
         roomEditText = (EditText) findViewById(R.id.room_edittext);
         roomEditText.requestFocus();
@@ -135,7 +126,9 @@ public class ConnectActivity extends Activity {
     public void onPause() {
         super.onPause();
         String room = roomEditText.getText().toString();
+        String url=serverUrlEditText.getText().toString();
         SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(keyprefServerUrl,url);
         editor.putString(keyprefRoom, room);
         editor.commit();
     }
@@ -144,6 +137,9 @@ public class ConnectActivity extends Activity {
     public void onResume() {
         super.onResume();
         String room = sharedPref.getString(keyprefRoom, "");
+        String url=sharedPref.getString(keyprefServerUrl,"https://apprtc.win");
+
+        serverUrlEditText.setText(url);
         roomEditText.setText(room);
     }
 
@@ -170,11 +166,18 @@ public class ConnectActivity extends Activity {
     private void connectToRoom(int runTimeMs) {
 
         long masterId = -1, roomId;
-        String stringMasterId, stringRoomId;
+        String stringMasterId, stringRoomId,StringServerUrl;
+        String roomUrl;
 
         stringRoomId = roomEditText.getText().toString().trim();
         stringMasterId = masterEditText.getText().toString().trim();
+        StringServerUrl=serverUrlEditText.getText().toString().trim();
 
+        if(StringServerUrl.equals(""))
+        {
+            Toast.makeText(this,"请输入消息服务器地址",Toast.LENGTH_SHORT).show();
+            return;
+        }
         try {
             roomId = Long.parseLong(stringRoomId);
             if (!stringMasterId.isEmpty()) {
@@ -185,10 +188,13 @@ public class ConnectActivity extends Activity {
             return;
         }
 
+
+
 //房间地址
-        String roomUrl = sharedPref.getString(
-                keyprefRoomServerUrl,
-                getString(R.string.pref_room_server_url_default));
+//        String roomUrl = sharedPref.getString(
+//                keyprefRoomServerUrl,
+//                getString(R.string.pref_room_server_url_default));
+        roomUrl=StringServerUrl;
 
         // Video call enabled flag.
         boolean videoCallEnabled = sharedPref.getBoolean(keyprefVideoCallEnabled,

@@ -1,58 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:weightSum="1"
-        android:layout_margin="8dp"
-        android:layout_centerHorizontal="true">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerHorizontal="true"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <ImageButton
+        android:id="@+id/qr_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:id="@+id/qr_button"
-        android:background="@drawable/qr"
-        android:layout_weight="0.05" />
+        android:layout_weight="0.05"
+        android:background="@drawable/qr" />
 
     <ImageButton
-            android:id="@+id/connect_button"
-        android:contentDescription="@string/connect_description"
+        android:id="@+id/connect_button"
         android:layout_width="64dp"
-            android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/room_edittext"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
+        android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/client_edittext"
-        android:scaleType="fitCenter"
-        android:background="@drawable/call" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/room_edittext"
+        android:background="@drawable/call"
+        android:contentDescription="@string/connect_description"
+        android:scaleType="fitCenter" />
 
     <EditText
-            android:id="@+id/room_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-        android:hint="Room ID"
-        android:layout_below="@+id/qr_button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:id="@+id/room_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="64dp" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/serverUrl_edittext"
+        android:layout_marginRight="64dp"
+        android:hint="Room ID"
+        android:imeOptions="actionDone"
+        android:singleLine="true" />
 
     <EditText
         android:id="@+id/client_edittext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:imeOptions="actionDone"
-        android:hint="Master Client ID"
-        android:layout_below="@+id/room_edittext"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="64dp" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/room_edittext"
+        android:layout_marginRight="64dp"
+        android:hint="Master Client ID"
+        android:imeOptions="actionDone"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/serverUrl_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/connect_button"
+        android:layout_below="@+id/qr_button"
+        android:layout_marginRight="64dp"
+        android:hint="输入服务器地址"
+        android:imeOptions="actionDone"
+        android:singleLine="true" />
 
 </RelativeLayout>
